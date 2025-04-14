@@ -4,16 +4,6 @@ import { InstitutionTable } from '@/app/institutions/components/institution-tabl
 import { columns, Institution } from '@/app/institutions/components/columns';
 import { parseAsInteger } from 'nuqs/server';
 
-interface InstitutionsProps {
-  searchParams?: {
-    page?: string;
-    perPage?: string;
-    filters?: string;
-    sort?: string;
-    joinOperator?: string;
-  };
-}
-
 interface Filter {
   id: string;
   value: string;
@@ -29,21 +19,52 @@ interface SortOption {
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export default async function Institutions({ searchParams }: InstitutionsProps) {
+export default async function Institutions({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
-  const page = parseAsInteger.withDefault(1).parse(searchParams?.page ?? '');
-  const perPage = parseAsInteger.withDefault(DEFAULT_PAGE_SIZE).parse(searchParams?.perPage ?? '');
+  // Handle potential string array for page and perPage
+  const pageParam = resolvedSearchParams?.page;
+  const perPageParam = resolvedSearchParams?.perPage;
+
+  const page = parseAsInteger.withDefault(1).parse(
+    typeof pageParam === 'string' ? pageParam : ''
+  );
+  const perPage = parseAsInteger.withDefault(DEFAULT_PAGE_SIZE).parse(
+    typeof perPageParam === 'string' ? perPageParam : ''
+  );
   const pageSize = perPage ?? DEFAULT_PAGE_SIZE;
 
   // Parse filters if they exist
-  const filters: Filter[] = searchParams?.filters ? JSON.parse(searchParams.filters) : [];
-  
+  let filters: Filter[] = [];
+  const filtersParam = resolvedSearchParams?.filters;
+  if (filtersParam && typeof filtersParam === 'string') {
+    try {
+      filters = JSON.parse(filtersParam);
+    } catch (error) {
+      console.error('Error parsing filters JSON:', error);
+      // Handle invalid JSON, maybe set default filters or show an error
+    }
+  }
+
   // Parse sort if it exists
-  const sortOptions: SortOption[] = searchParams?.sort ? JSON.parse(searchParams.sort) : [];
-  
+  let sortOptions: SortOption[] = [];
+  const sortParam = resolvedSearchParams?.sort;
+  if (sortParam && typeof sortParam === 'string') {
+    try {
+      sortOptions = JSON.parse(sortParam);
+    } catch (error) {
+      console.error('Error parsing sort JSON:', error);
+      // Handle invalid JSON, maybe set default sort or show an error
+    }
+  }
+
   // Check join operator
-  const joinOperator = searchParams?.joinOperator === 'or' ? 'or' : 'and';
+  const joinOperator = resolvedSearchParams?.joinOperator === 'or' ? 'or' : 'and';
 
   const offset = ((page ?? 1) - 1) * pageSize;
 
