@@ -4,28 +4,48 @@ import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-table-column-header"
 import { Building2, MapPin, Hash } from "lucide-react"
 
-// This type is based on the institution properties from the YAML file
-export type Institution = {
-  cert: string // FDIC Certificate #
-  name: string // Legal Name
-  city: string // City
-  stname: string // State Name
-  zip: string // ZIP Code
-  address: string // Street Address
-  asset: number // Total assets
-  cb: string // Community Bank flag
-  bkclass: string // Institution Class
-  active: string // Institution Status
-  // Add other relevant fields as needed
+// Define and export the AvailableColumn type here
+export interface AvailableColumn {
+  id: keyof Institution | string;
+  label: string;
 }
 
-export const columns: ColumnDef<Institution>[] = [
-  {
+// This type is based on the institution properties from the YAML file
+export type Institution = {
+  cert?: string // FDIC Certificate #
+  name?: string // Legal Name
+  city?: string // City
+  stname?: string // State Name (Abbreviation)
+  zip?: string // ZIP Code
+  address?: string // Street Address
+  asset?: string // Total Assets in thousands
+  cb?: string // Community Bank flag
+  bkclass?: string // Institution Class
+  active?: string // Institution Status
+}
+
+// Define ALL possible columns in a Record keyed by their accessorKey/id
+const allColumns: Record<string, ColumnDef<Institution>> = {
+  cert: {
+    accessorKey: "cert",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Certificate #" />
+    ),
+    meta: {
+      label: "Certificate #",
+      placeholder: "Search certificate #...",
+      variant: "text",
+      icon: Hash,
+    },
+    enableColumnFilter: true,
+    enableHiding: false, // Usually keep ID visible
+  },
+  name: {
     accessorKey: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Legal Name" />
     ),
-    cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
     meta: {
       label: "Legal Name",
       placeholder: "Search names...",
@@ -34,7 +54,7 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-  {
+  city: {
     accessorKey: "city",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="City" />
@@ -47,7 +67,7 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-  {
+  stname: {
     accessorKey: "stname",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="State" />
@@ -60,7 +80,7 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-  {
+  zip: {
     accessorKey: "zip",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="ZIP Code" />
@@ -73,7 +93,7 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-  {
+  address: {
     accessorKey: "address",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Address" />
@@ -86,44 +106,25 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-  {
-    accessorKey: "bkclass",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Institution Class" />
-    ),
-    meta: {
-      label: "Institution Class",
-      variant: "select",
-      options: [
-        { label: "National Bank", value: "N" },
-        { label: "State Member Bank", value: "SM" },
-        { label: "State Non-Member Bank", value: "NM" },
-        { label: "Savings Bank", value: "SB" },
-        { label: "Savings Association", value: "SA" },
-        { label: "Other Institution", value: "OI" }
-      ],
-      icon: Building2,
-    },
-    enableColumnFilter: true,
-  },
-  {
+  asset: {
     accessorKey: "asset",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Total Assets" />
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("asset")) * 1000; // Convert to actual amount
-      if (isNaN(amount)) {
-        return <div>-</div>;
+      const value = row.getValue("asset");
+      if (value === null || value === undefined || isNaN(Number(value))) {
+        return <div className="">-</div>;
       }
+      const amount = parseFloat(value as string) * 1000; // Convert K to actual amount
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-        notation: "standard", // Changed to standard to always show full number
-        minimumFractionDigits: 0, // Ensure no decimal places
-        maximumFractionDigits: 0, // Ensure no decimal places
+        notation: "standard",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
       }).format(amount);
-      
+
       return <div className="">{formatted}</div>;
     },
     meta: {
@@ -135,11 +136,15 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-  {
+  cb: {
     accessorKey: "cb",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Community Bank" />
     ),
+    cell: ({ row }) => {
+       const flag = row.getValue("cb");
+       return <div>{flag === "1" ? "Yes" : flag === "0" ? "No" : "-"}</div>;
+    },
     meta: {
       label: "Community Bank",
       variant: "select",
@@ -151,20 +156,27 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-  {
-    accessorKey: "cert",
+  bkclass: {
+    accessorKey: "bkclass",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Certificate #" />
+      <DataTableColumnHeader column={column} title="Class" />
     ),
     meta: {
-      label: "Certificate #",
-      placeholder: "Search certificate #...",
-      variant: "text",
-      icon: Hash,
+      label: "Institution Class",
+      variant: "select",
+      options: [
+        { label: "National Bank", value: "N" },
+        { label: "State Member", value: "SM" },
+        { label: "State Non-Member", value: "NM" },
+        { label: "Savings Bank", value: "SB" },
+        { label: "Savings Assoc.", value: "SA" },
+        { label: "Other", value: "OI" }
+      ],
+      icon: Building2,
     },
     enableColumnFilter: true,
   },
-  {
+  active: {
     accessorKey: "active",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
@@ -184,4 +196,14 @@ export const columns: ColumnDef<Institution>[] = [
     },
     enableColumnFilter: true,
   },
-] 
+};
+
+// Remove the old static export
+// export const columns: ColumnDef<Institution>[] = [ ... ];
+
+// Function to get columns based on selected IDs using the Record above
+export function getInstitutionTableColumns(selectedColumnIds: string[]): ColumnDef<Institution>[] {
+  return selectedColumnIds
+    .map(id => allColumns[id]) // Use the 'allColumns' Record
+    .filter(Boolean); // Filter out undefined in case of bad/missing IDs
+} 

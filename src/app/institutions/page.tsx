@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { InstitutionTable } from '@/app/institutions/components/institution-table';
-import { columns, Institution } from '@/app/institutions/components/columns';
-import { parseAsInteger } from 'nuqs/server';
+import { AvailableColumn, Institution } from '@/app/institutions/components/columns';
+import { parseAsInteger, parseAsArrayOf, parseAsString } from 'nuqs/server';
 
 interface Filter {
   id: string;
@@ -18,6 +18,25 @@ interface SortOption {
 }
 
 const DEFAULT_PAGE_SIZE = 10;
+const COLUMNS_KEY = "columns";
+const ARRAY_SEPARATOR = ",";
+
+// Define available columns based on fetched data
+const availableColumns: AvailableColumn[] = [
+  { id: 'cert', label: 'Certificate' },
+  { id: 'name', label: 'Name' },
+  { id: 'city', label: 'City' },
+  { id: 'stname', label: 'State' },
+  { id: 'zip', label: 'Zip' },
+  { id: 'address', label: 'Address' },
+  { id: 'asset', label: 'Assets' },
+  { id: 'cb', label: 'Commercial Bank' },
+  { id: 'bkclass', label: 'Bank Class' },
+  { id: 'active', label: 'Active' },
+];
+
+// Define initially selected columns (adjust as needed)
+const initialSelectedColumns = ['cert', 'name', 'city', 'stname', 'asset', 'active'];
 
 export default async function Institutions({
   searchParams,
@@ -38,6 +57,16 @@ export default async function Institutions({
     typeof perPageParam === 'string' ? perPageParam : ''
   );
   const pageSize = perPage ?? DEFAULT_PAGE_SIZE;
+
+  // Parse selected columns, defaulting to initialSelectedColumns
+  const columnsParam = resolvedSearchParams?.[COLUMNS_KEY];
+  const selectedColumns = parseAsArrayOf(parseAsString, ARRAY_SEPARATOR)
+    .withDefault(initialSelectedColumns)
+    .parse(typeof columnsParam === 'string' ? columnsParam : '');
+
+  // Ensure 'cert' is always selected as it's the primary identifier
+  const selectColumnsString = [...new Set(['cert', ...(selectedColumns ?? [])])]
+    .join(',');
 
   // Parse filters if they exist
   let filters: Filter[] = [];
@@ -109,7 +138,7 @@ export default async function Institutions({
   // Build data query with filters
   let query = supabase
     .from('fdic_data_institutions')
-    .select('cert, name, city, stname, zip, address, asset, cb, bkclass, active')
+    .select(selectColumnsString)
     .range(offset, offset + pageSize - 1);
   
   // Apply filters to data query based on join operator
@@ -175,7 +204,8 @@ export default async function Institutions({
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">FDIC Institutions</h1>
         <InstitutionTable
-          columns={columns}
+          availableColumns={availableColumns}
+          initialSelectedColumns={initialSelectedColumns}
           data={institutions as Institution[]}
           pageCount={totalPages}
         />

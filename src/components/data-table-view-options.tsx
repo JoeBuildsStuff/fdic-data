@@ -1,7 +1,7 @@
 "use client";
 
-import type { Table } from "@tanstack/react-table";
 import { Check, ChevronsUpDown, Settings2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,26 +17,27 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import * as React from "react";
+import type { AvailableColumn } from "@/app/institutions/components/columns";
+import type { Options } from "nuqs";
 
-interface DataTableViewOptionsProps<TData> {
-  table: Table<TData>;
+interface DataTableViewOptionsProps {
+  availableColumns: AvailableColumn[];
+  selectedColumns: string[];
+  onColumnsChange: (value: string[] | ((old: string[]) => string[] | null) | null, options?: Options | undefined) => Promise<URLSearchParams>;
 }
 
-export function DataTableViewOptions<TData>({
-  table,
-}: DataTableViewOptionsProps<TData>) {
-  const columns = React.useMemo(
-    () =>
-      table
-        .getAllColumns()
-        .filter(
-          (column) =>
-            typeof column.accessorFn !== "undefined" && column.getCanHide(),
-        ),
-    [table],
-  );
+export function DataTableViewOptions({
+  availableColumns,
+  selectedColumns,
+  onColumnsChange,
+}: DataTableViewOptionsProps) {
+  const handleSelect = (columnId: string) => {
+    const newSelectedColumns = selectedColumns.includes(columnId)
+      ? selectedColumns.filter((id) => id !== columnId)
+      : [...selectedColumns, columnId];
+    onColumnsChange(newSelectedColumns);
+  };
 
   return (
     <Popover>
@@ -59,24 +60,24 @@ export function DataTableViewOptions<TData>({
           <CommandList>
             <CommandEmpty>No columns found.</CommandEmpty>
             <CommandGroup>
-              {columns.map((column) => (
-                <CommandItem
-                  key={column.id}
-                  onSelect={() =>
-                    column.toggleVisibility(!column.getIsVisible())
-                  }
-                >
-                  <span className="truncate">
-                    {column.columnDef.meta?.label ?? column.id}
-                  </span>
-                  <Check
-                    className={cn(
-                      "ml-auto size-4 shrink-0",
-                      column.getIsVisible() ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
+              {Array.isArray(availableColumns) && availableColumns.map((column) => {
+                const isSelected = selectedColumns.includes(column.id as string);
+                return (
+                  <CommandItem
+                    key={column.id as string}
+                    onSelect={() => handleSelect(column.id as string)}
+                    className="cursor-pointer"
+                  >
+                    <span className="truncate">{column.label}</span>
+                    <Check
+                      className={cn(
+                        "ml-auto size-4 shrink-0",
+                        isSelected ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

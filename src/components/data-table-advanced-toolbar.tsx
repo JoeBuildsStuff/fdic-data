@@ -1,22 +1,27 @@
 "use client";
 
-import type { Table } from "@tanstack/react-table";
 import type * as React from "react";
 
 import { DataTableViewOptions } from "@/components/data-table-view-options";
 import { cn } from "@/lib/utils";
+import type { AvailableColumn } from "@/app/institutions/components/columns";
+import type { Options } from "nuqs";
 
-interface DataTableAdvancedToolbarProps<TData>
+interface DataTableAdvancedToolbarProps
   extends React.ComponentProps<"div"> {
-  table: Table<TData>;
+  availableColumns: AvailableColumn[];
+  selectedColumns: string[];
+  onColumnsChange: (value: string[] | ((old: string[]) => string[] | null) | null, options?: Options | undefined) => Promise<URLSearchParams>; // Match setter type from nuqs
 }
 
-export function DataTableAdvancedToolbar<TData>({
-  table,
+export function DataTableAdvancedToolbar({
   children,
   className,
+  availableColumns,
+  selectedColumns,
+  onColumnsChange,
   ...props
-}: DataTableAdvancedToolbarProps<TData>) {
+}: DataTableAdvancedToolbarProps) {
   return (
     <div
       role="toolbar"
@@ -29,7 +34,11 @@ export function DataTableAdvancedToolbar<TData>({
     >
       <div className="flex flex-1 flex-wrap items-center gap-2">{children}</div>
       <div className="flex items-center gap-2">
-        <DataTableViewOptions table={table} />
+        <DataTableViewOptions
+          availableColumns={availableColumns}
+          selectedColumns={selectedColumns}
+          onColumnsChange={onColumnsChange}
+        />
       </div>
     </div>
   );

@@ -32,10 +32,13 @@ import * as React from "react";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { getSortingStateParser } from "@/lib/parsers";
 import type { ExtendedColumnSort } from "@/types/data-table";
+import type { AvailableColumn } from "@/app/institutions/components/columns";
+import type { ColumnDef } from "@tanstack/react-table";
 
 const PAGE_KEY = "page";
 const PER_PAGE_KEY = "perPage";
 const SORT_KEY = "sort";
+const COLUMNS_KEY = "columns";
 const ARRAY_SEPARATOR = ",";
 const DEBOUNCE_MS = 300;
 const THROTTLE_MS = 50;
@@ -51,9 +54,12 @@ interface UseDataTableProps<TData>
       | "manualSorting"
     >,
     Required<Pick<TableOptions<TData>, "pageCount">> {
-  initialState?: Omit<Partial<TableState>, "sorting"> & {
+  getColumns: (selectedIds: string[]) => ColumnDef<TData>[];
+  initialState?: Omit<Partial<TableState>, "sorting" | "columnVisibility"> & {
     sorting?: ExtendedColumnSort<TData>[];
+    selectedColumns?: string[];
   };
+  availableColumns: AvailableColumn[];
   history?: "push" | "replace";
   debounceMs?: number;
   throttleMs?: number;
@@ -66,7 +72,7 @@ interface UseDataTableProps<TData>
 
 export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const {
-    columns,
+    getColumns,
     pageCount = -1,
     initialState,
     history = "replace",
@@ -77,6 +83,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     scroll = false,
     shallow = true,
     startTransition,
+    availableColumns,
     ...tableProps
   } = props;
 
@@ -106,8 +113,6 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
     initialState?.rowSelection ?? {},
   );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(initialState?.columnVisibility ?? {});
 
   const [page, setPage] = useQueryState(
     PAGE_KEY,
@@ -122,7 +127,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const pagination: PaginationState = React.useMemo(() => {
     return {
-      pageIndex: page - 1, // zero-based index -> one-based index
+      pageIndex: page - 1,
       pageSize: perPage,
     };
   }, [page, perPage]);
@@ -143,9 +148,9 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const columnIds = React.useMemo(() => {
     return new Set(
-      columns.map((column) => column.id).filter(Boolean) as string[],
+      getColumns(initialState?.selectedColumns ?? []).map((column) => column.id).filter(Boolean) as string[],
     );
-  }, [columns]);
+  }, [getColumns, initialState]);
 
   const [sorting, setSorting] = useQueryState(
     SORT_KEY,
@@ -166,11 +171,41 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     [sorting, setSorting],
   );
 
+  // Calculate default columns safely, ensuring availableColumns exists
+  const defaultSelectedColumns = React.useMemo(() => {
+    return availableColumns ? availableColumns.map(c => c.id as string) : [];
+  }, [availableColumns]);
+
+  const [selectedColumns, setSelectedColumns] = useQueryState(
+    COLUMNS_KEY,
+    parseAsArrayOf(parseAsString, ARRAY_SEPARATOR)
+      .withOptions(queryStateOptions)
+      // Use the safely pre-calculated default
+      .withDefault(initialState?.selectedColumns ?? defaultSelectedColumns)
+  );
+
+  const columnVisibility = React.useMemo(() => {
+    const visibilityState: VisibilityState = {};
+    const selectedSet = new Set(selectedColumns);
+    // Ensure availableColumns exists before iterating
+    if (availableColumns) {
+      availableColumns.forEach(col => {
+        visibilityState[col.id as string] = selectedSet.has(col.id as string);
+      });
+    }
+    return visibilityState;
+  }, [selectedColumns, availableColumns]);
+
+  const tableColumns = React.useMemo(
+    () => getColumns(selectedColumns),
+    [selectedColumns, getColumns]
+  );
+
   const filterableColumns = React.useMemo(() => {
     if (enableAdvancedFilter) return [];
 
-    return columns.filter((column) => column.enableColumnFilter);
-  }, [columns, enableAdvancedFilter]);
+    return tableColumns.filter((column) => column.enableColumnFilter);
+  }, [tableColumns, enableAdvancedFilter]);
 
   const filterParsers = React.useMemo(() => {
     if (enableAdvancedFilter) return {};
@@ -260,26 +295,26 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const table = useReactTable({
     ...tableProps,
-    columns,
-    initialState,
-    pageCount,
+    columns: tableColumns,
+    pageCount: pageCount === -1 ? undefined : pageCount,
+    data: props.data ?? [],
+    enableRowSelection: tableProps.enableRowSelection ?? true,
+    enableHiding: tableProps.enableHiding ?? true,
+    enableSorting: true,
+    manualFiltering: false,
+    manualPagination: true,
+    manualSorting: true,
     state: {
-      pagination,
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
+      pagination: pagination,
+      rowSelection: rowSelection,
+      sorting: sorting,
+      columnVisibility: columnVisibility,
+      columnFilters: columnFilters,
     },
-    defaultColumn: {
-      ...tableProps.defaultColumn,
-      enableColumnFilter: false,
-    },
-    enableRowSelection: true,
+    onPaginationChange: onPaginationChange,
+    onSortingChange: onSortingChange,
+    onColumnFiltersChange: onColumnFiltersChange,
     onRowSelectionChange: setRowSelection,
-    onPaginationChange,
-    onSortingChange,
-    onColumnFiltersChange,
-    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -287,10 +322,17 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
+    debugTable: tableProps.debugTable ?? false,
+    debugHeaders: tableProps.debugHeaders ?? false,
+    debugColumns: tableProps.debugColumns ?? false,
   });
 
-  return { table, shallow, debounceMs, throttleMs };
+  return {
+    table,
+    shallow,
+    debounceMs,
+    throttleMs,
+    selectedColumns,
+    setSelectedColumns,
+  };
 }
