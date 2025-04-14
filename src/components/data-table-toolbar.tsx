@@ -3,6 +3,8 @@
 import type { Column, Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import * as React from "react";
+import type { Options } from "nuqs";
+import type { AvailableColumn } from "@/app/institutions/components/columns";
 
 import { DataTableDateFilter } from "@/components/data-table-date-filter";
 import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter";
@@ -14,12 +16,18 @@ import { cn } from "@/lib/utils";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
   table: Table<TData>;
+  availableColumns: AvailableColumn[];
+  selectedColumns: string[];
+  onColumnsChange: (value: string[] | ((old: string[]) => string[] | null) | null, options?: Options | undefined) => Promise<URLSearchParams>;
 }
 
 export function DataTableToolbar<TData>({
   table,
   children,
   className,
+  availableColumns,
+  selectedColumns,
+  onColumnsChange,
   ...props
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
@@ -62,11 +70,16 @@ export function DataTableToolbar<TData>({
       </div>
       <div className="flex items-center gap-2">
         {children}
-        <DataTableViewOptions table={table} />
+        <DataTableViewOptions
+          availableColumns={availableColumns}
+          selectedColumns={selectedColumns}
+          onColumnsChange={onColumnsChange}
+        />
       </div>
     </div>
   );
 }
+
 interface DataTableToolbarFilterProps<TData> {
   column: Column<TData>;
 }
