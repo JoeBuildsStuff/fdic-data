@@ -1,101 +1,163 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import { InstitutionTable } from '@/app/institutions/components/institution-table';
+import { columns, Institution } from '@/app/institutions/components/columns';
+import { parseAsInteger } from 'nuqs/server';
 
 interface InstitutionsProps {
   searchParams?: {
     page?: string;
+    perPage?: string;
+    filters?: string;
+    sort?: string;
+    joinOperator?: string;
   };
 }
 
+interface Filter {
+  id: string;
+  value: string;
+  variant: string;
+  operator: string;
+  filterId: string;
+}
+
+interface SortOption {
+  id: string;
+  desc: boolean;
+}
+
+const DEFAULT_PAGE_SIZE = 10;
+
 export default async function Institutions({ searchParams }: InstitutionsProps) {
   const supabase = await createClient();
-  const pageSize = 10;
-  const currentPage = parseInt(searchParams?.page || '1', 10);
 
-  if (isNaN(currentPage) || currentPage < 1) {
-    // Handle invalid page number, maybe redirect to page 1 or show an error
-    // For simplicity, let's treat it as page 1 for now
-    // In a real app, consider redirecting: redirect('/institutions?page=1')
-  }
+  const page = parseAsInteger.withDefault(1).parse(searchParams?.page ?? '');
+  const perPage = parseAsInteger.withDefault(DEFAULT_PAGE_SIZE).parse(searchParams?.perPage ?? '');
+  const pageSize = perPage ?? DEFAULT_PAGE_SIZE;
 
-  const offset = (currentPage - 1) * pageSize;
+  // Parse filters if they exist
+  const filters: Filter[] = searchParams?.filters ? JSON.parse(searchParams.filters) : [];
+  
+  // Parse sort if it exists
+  const sortOptions: SortOption[] = searchParams?.sort ? JSON.parse(searchParams.sort) : [];
+  
+  // Check join operator
+  const joinOperator = searchParams?.joinOperator === 'or' ? 'or' : 'and';
 
-  const { count, error: countError } = await supabase
+  const offset = ((page ?? 1) - 1) * pageSize;
+
+  // Build count query with filters
+  let countQuery = supabase
     .from('fdic_data_institutions')
     .select('*', { count: 'exact', head: true });
+    
+  // Apply filters to count query based on join operator
+  if (joinOperator === 'or' && filters.length > 0) {
+    const orFilters = filters.map(filter => {
+      if (filter.operator === 'iLike') {
+        return `${filter.id}.ilike.%${filter.value}%`;
+      } else if (filter.operator === 'eq') {
+        return `${filter.id}.eq.${filter.value}`;
+      }
+      return '';
+    }).filter(Boolean);
+    
+    if (orFilters.length > 0) {
+      countQuery = countQuery.or(orFilters.join(','));
+    }
+  } else {
+    // Apply filters with AND logic (default)
+    filters.forEach(filter => {
+      if (filter.operator === 'iLike') {
+        countQuery = countQuery.ilike(filter.id, `%${filter.value}%`);
+      } else if (filter.operator === 'eq') {
+        countQuery = countQuery.eq(filter.id, filter.value);
+      }
+      // Add more operators as needed
+    });
+  }
+
+  const { count, error: countError } = await countQuery;
 
   if (countError) {
     console.error('Error fetching institution count:', countError);
-    return <div className="text-red-500">Error loading data count.</div>;
+    return <div className="p-4 text-red-500">Error loading data count.</div>;
   }
 
-  const { data: institutions, error: dataError } = await supabase
+  // Build data query with filters
+  let query = supabase
     .from('fdic_data_institutions')
-    .select('*')
+    .select('cert, name, city, stname, zip, address, asset, cb, bkclass, active')
     .range(offset, offset + pageSize - 1);
+  
+  // Apply filters to data query based on join operator
+  if (joinOperator === 'or' && filters.length > 0) {
+    const orFilters = filters.map(filter => {
+      if (filter.operator === 'iLike') {
+        return `${filter.id}.ilike.%${filter.value}%`;
+      } else if (filter.operator === 'eq') {
+        return `${filter.id}.eq.${filter.value}`;
+      }
+      return '';
+    }).filter(Boolean);
+    
+    if (orFilters.length > 0) {
+      query = query.or(orFilters.join(','));
+    }
+  } else {
+    // Apply filters with AND logic (default)
+    filters.forEach(filter => {
+      if (filter.operator === 'iLike') {
+        query = query.ilike(filter.id, `%${filter.value}%`);
+      } else if (filter.operator === 'eq') {
+        query = query.eq(filter.id, filter.value);
+      }
+      // Add more operators as needed
+    });
+  }
+  
+  // Apply sorting
+  sortOptions.forEach(sort => {
+    if (sort.id === 'asset' && sort.desc) {
+      // For asset column in descending order, put NULL/NaN values last
+      query = query.order(sort.id, { ascending: false, nullsFirst: false });
+    } else {
+      query = query.order(sort.id, { ascending: !sort.desc, nullsFirst: !sort.desc });
+    }
+  });
+
+  const { data: institutions, error: dataError } = await query;
 
   if (dataError) {
     console.error('Error fetching institutions:', dataError);
-    return <div className="text-red-500">Error loading data.</div>;
+    return <div className="p-4 text-red-500">Error loading data.</div>;
   }
 
-  if (!institutions || institutions.length === 0) {
-    if (currentPage > 1) {
-       return (
-         <div className="p-4">
-           <h1 className="text-2xl font-bold mb-4">FDIC Institutions</h1>
-           <div>No institution data found for this page.</div>
-           <div className="flex justify-between mt-4">
-            <Link href={`/institutions?page=${currentPage - 1}`}>
-              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
-                Previous
-              </button>
-            </Link>
-            <span>Page {currentPage}</span>
-            <span></span>
-          </div>
-         </div>
-       );
-    }
-    return <div className="p-4">No institution data found at all.</div>;
-  }
+  const totalPages = Math.ceil((count ?? 0) / pageSize);
 
-  const totalPages = Math.ceil((count || 0) / pageSize);
+  if (!institutions && (count ?? 0) > 0 && (page ?? 1) > 1) {
+     return (
+       <div className="p-4">
+         <h1 className="text-2xl font-bold mb-4">FDIC Institutions</h1>
+         <p>Page {page ?? 1} does not exist. The last page is {totalPages}.</p>
+         <Link href={`/institutions?page=${totalPages}`}>
+            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+              Go to Last Page
+            </button>
+          </Link>
+       </div>
+     );
+  }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">FDIC Institutions (Page {currentPage}/{totalPages})</h1>
-      <pre className="bg-gray-100 p-4 rounded overflow-auto">
-        {JSON.stringify(institutions, null, 2)}
-      </pre>
-
-      <div className="flex justify-between items-center mt-4">
-        {currentPage > 1 ? (
-          <Link href={`/institutions?page=${currentPage - 1}`}>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:opacity-50">
-              Previous
-            </button>
-          </Link>
-        ) : (
-          <button className="px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed" disabled>
-            Previous
-          </button>
-        )}
-
-        <span>Page {currentPage} of {totalPages}</span>
-
-        {currentPage < totalPages ? (
-          <Link href={`/institutions?page=${currentPage + 1}`}>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:opacity-50">
-              Next
-            </button>
-          </Link>
-        ) : (
-          <button className="px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed" disabled>
-            Next
-          </button>
-        )}
-      </div>
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-bold mb-6">FDIC Institutions</h1>
+        <InstitutionTable
+          columns={columns}
+          data={institutions as Institution[]}
+          pageCount={totalPages}
+        />
     </div>
   );
 }
