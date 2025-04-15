@@ -11,6 +11,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -39,6 +40,13 @@ export function DataTableViewOptions({
     onColumnsChange(newSelectedColumns);
   };
 
+  const selectedAvailableColumns = availableColumns.filter((col) =>
+    selectedColumns.includes(col.id as string)
+  );
+  const unselectedAvailableColumns = availableColumns.filter(
+    (col) => !selectedColumns.includes(col.id as string)
+  );
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -59,26 +67,53 @@ export function DataTableViewOptions({
           <CommandInput placeholder="Search columns..." />
           <CommandList>
             <CommandEmpty>No columns found.</CommandEmpty>
-            <CommandGroup>
-              {Array.isArray(availableColumns) && availableColumns.map((column) => {
-                const isSelected = selectedColumns.includes(column.id as string);
-                return (
-                  <CommandItem
-                    key={column.id as string}
-                    onSelect={() => handleSelect(column.id as string)}
-                    className="cursor-pointer"
-                  >
-                    <span className="truncate">{column.label}</span>
-                    <Check
-                      className={cn(
-                        "ml-auto size-4 shrink-0",
-                        isSelected ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
+            {selectedAvailableColumns.length > 0 && (
+              <CommandGroup heading="Selected Columns">
+                {selectedAvailableColumns.map((column) => {
+                  const isSelected = true;
+                  return (
+                    <CommandItem
+                      key={column.id as string}
+                      onSelect={() => handleSelect(column.id as string)}
+                      className="cursor-pointer"
+                    >
+                      <span className="truncate">{column.label}</span>
+                      <Check
+                        className={cn(
+                          "ml-auto size-4 shrink-0",
+                          isSelected ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            )}
+            {selectedAvailableColumns.length > 0 && unselectedAvailableColumns.length > 0 && (
+              <CommandSeparator />
+            )}
+            {unselectedAvailableColumns.length > 0 && (
+              <CommandGroup heading="Available Columns">
+                {unselectedAvailableColumns.map((column) => {
+                  const isSelected = false;
+                  return (
+                    <CommandItem
+                      key={column.id as string}
+                      onSelect={() => handleSelect(column.id as string)}
+                      className="cursor-pointer"
+                    >
+                      <span className="truncate">{column.label}</span>
+                      <Check
+                        className={cn(
+                          "ml-auto size-4 shrink-0",
+                          isSelected ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

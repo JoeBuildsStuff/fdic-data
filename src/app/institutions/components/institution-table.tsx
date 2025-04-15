@@ -27,7 +27,7 @@ export function InstitutionTable<TData>({
   initialSelectedColumns,
   initialPage = 1,
   initialPageSize = 10,
-  initialSorting = [{ id: "asset", desc: true } as ExtendedColumnSort<TData>],
+  initialSorting,
 }: InstitutionTableProps<TData>) {
   
   // Generate columns based on initialSelectedColumns
