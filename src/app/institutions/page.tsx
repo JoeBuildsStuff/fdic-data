@@ -13,7 +13,7 @@ interface Filter {
   filterId: string;
 }
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 20;
 const COLUMNS_KEY = "columns";
 const ARRAY_SEPARATOR = ",";
 
@@ -174,7 +174,7 @@ const availableColumns: AvailableColumn[] = [
 ];
 
 // Define initially selected columns (adjust as needed)
-const initialSelectedColumns = ['cert', 'name', 'city', 'stname', 'asset', 'active'];
+const initialSelectedColumns = ['cert', 'estymd', 'name', 'asset', 'dep', 'netinc', 'roa', 'roe', 'offdom' ];
 
 // Define default sort options using the correct type
 const defaultSortOptions: ExtendedColumnSort<Institution>[] = [{ id: 'asset', desc: true }];
@@ -291,6 +291,7 @@ export default async function Institutions({
   let query = supabase
     .from('fdic_data_institutions')
     .select(selectColumnsString)
+    .eq('active', 1) // Hardcode status filter to 1
     .range(offset, offset + pageSize - 1);
   
   // Apply filters to data query based on join operator
@@ -361,6 +362,7 @@ export default async function Institutions({
           data={institutions as Institution[]}
           pageCount={totalPages}
           initialSorting={sortOptions}
+          initialPageSize={DEFAULT_PAGE_SIZE}
         />
     </div>
   );
