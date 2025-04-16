@@ -3,7 +3,7 @@
 import * as React from "react"
 import {
   Building2,
-  // DollarSign,
+  DollarSign,
   // Globe,
 } from "lucide-react"
 
@@ -37,22 +37,22 @@ const navMain = [
         },
       ],
     },
-    // {
-    //   title: "Financials",
-    //   url: "/financials/dashboard",
-    //   icon: DollarSign,
-    //   isActive: true,
-    //   items: [
-    //     {
-    //       title: "Dashboard",
-    //       url: "/financials/dashboard",
-    //     },
-    //     {
-    //       title: "Table",
-    //       url: "/financials/table",
-    //     },
-    //   ],
-    // },
+    {
+      title: "Financials",
+      url: "/financials/dashboard",
+      icon: DollarSign,
+      isActive: true,
+      items: [
+        {
+          title: "Dashboard",
+          url: "/financials/dashboard",
+        },
+        {
+          title: "Table",
+          url: "/financials/table",
+        },
+      ],
+    },
     // {
     //   title: "Industry",
     //   url: "/industry/dashboard",
