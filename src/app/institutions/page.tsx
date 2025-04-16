@@ -161,7 +161,7 @@ const availableColumns: AvailableColumn[] = [
   { id: 'te04n529', label: 'Trade Name 04' },
   { id: 'te05n529', label: 'Trade Name 05' },
   { id: 'te06n529', label: 'Trade Name 06' },
-  { id: 'tract', label: '' }, // Note: Empty label from YAML
+  { id: 'tract', label: 'Trust Activity Indicator' }, // Note: Empty label from YAML
   { id: 'trust', label: 'Trust Powers' },
   { id: 'ultcert', label: 'Ultimate Cert' },
   { id: 'uninum', label: 'FDIC\'s unique number' },
@@ -174,7 +174,7 @@ const availableColumns: AvailableColumn[] = [
 ];
 
 // Define initially selected columns (adjust as needed)
-const initialSelectedColumns = ['cert', 'estymd', 'name', 'asset', 'dep', 'netinc', 'roa', 'roe', 'offdom' ];
+const initialSelectedColumns = ['cert', 'estymd', 'name', 'asset', 'dep','eq', 'netinc', 'roa', 'roe' ];
 
 // Define default sort options using the correct type
 const defaultSortOptions: ExtendedColumnSort<Institution>[] = [{ id: 'asset', desc: true }];
@@ -257,10 +257,26 @@ export default async function Institutions({
   // Apply filters to count query based on join operator
   if (joinOperator === 'or' && filters.length > 0) {
     const orFilters = filters.map(filter => {
+      // Skip filter if value is empty
+      if (!filter.value) return ''; 
+
       if (filter.operator === 'iLike') {
         return `${filter.id}.ilike.%${filter.value}%`;
       } else if (filter.operator === 'eq') {
         return `${filter.id}.eq.${filter.value}`;
+      } else if (filter.operator === 'gt') {
+        // Convert ms timestamp to ISO string for date comparison
+        if (filter.id === 'estymd') {
+          try {
+            const dateValue = new Date(parseInt(filter.value)).toISOString();
+            return `${filter.id}.gt.${dateValue}`;
+          } catch (e) {
+            console.error("Error parsing date for filter:", filter, e);
+            return ''; // Skip filter if date parsing fails
+          }
+        } else {
+          return `${filter.id}.gt.${filter.value}`;
+        }
       }
       return '';
     }).filter(Boolean);
@@ -271,10 +287,26 @@ export default async function Institutions({
   } else {
     // Apply filters with AND logic (default)
     filters.forEach(filter => {
+      // Skip filter if value is empty
+      if (!filter.value) return; 
+
       if (filter.operator === 'iLike') {
         countQuery = countQuery.ilike(filter.id, `%${filter.value}%`);
       } else if (filter.operator === 'eq') {
         countQuery = countQuery.eq(filter.id, filter.value);
+      } else if (filter.operator === 'gt') {
+        // Convert ms timestamp to ISO string for date comparison
+        if (filter.id === 'estymd') {
+          try {
+            const dateValue = new Date(parseInt(filter.value)).toISOString();
+            countQuery = countQuery.gt(filter.id, dateValue);
+          } catch (e) {
+            console.error("Error parsing date for filter:", filter, e);
+            // Skip filter if date parsing fails
+          }
+        } else {
+          countQuery = countQuery.gt(filter.id, filter.value);
+        }
       }
       // Add more operators as needed
     });
@@ -297,10 +329,26 @@ export default async function Institutions({
   // Apply filters to data query based on join operator
   if (joinOperator === 'or' && filters.length > 0) {
     const orFilters = filters.map(filter => {
+      // Skip filter if value is empty
+      if (!filter.value) return '';
+
       if (filter.operator === 'iLike') {
         return `${filter.id}.ilike.%${filter.value}%`;
       } else if (filter.operator === 'eq') {
         return `${filter.id}.eq.${filter.value}`;
+      } else if (filter.operator === 'gt') {
+        // Convert ms timestamp to ISO string for date comparison
+        if (filter.id === 'estymd') {
+          try {
+            const dateValue = new Date(parseInt(filter.value)).toISOString();
+            return `${filter.id}.gt.${dateValue}`;
+          } catch (e) {
+            console.error("Error parsing date for filter:", filter, e);
+            return ''; // Skip filter if date parsing fails
+          }
+        } else {
+          return `${filter.id}.gt.${filter.value}`;
+        }
       }
       return '';
     }).filter(Boolean);
@@ -311,10 +359,26 @@ export default async function Institutions({
   } else {
     // Apply filters with AND logic (default)
     filters.forEach(filter => {
+      // Skip filter if value is empty
+      if (!filter.value) return;
+
       if (filter.operator === 'iLike') {
         query = query.ilike(filter.id, `%${filter.value}%`);
       } else if (filter.operator === 'eq') {
         query = query.eq(filter.id, filter.value);
+      } else if (filter.operator === 'gt') {
+        // Convert ms timestamp to ISO string for date comparison
+        if (filter.id === 'estymd') {
+          try {
+            const dateValue = new Date(parseInt(filter.value)).toISOString();
+            query = query.gt(filter.id, dateValue);
+          } catch (e) {
+            console.error("Error parsing date for filter:", filter, e);
+            // Skip filter if date parsing fails
+          }
+        } else {
+          query = query.gt(filter.id, filter.value);
+        }
       }
       // Add more operators as needed
     });

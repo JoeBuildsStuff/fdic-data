@@ -169,7 +169,7 @@ const renderFlag = (value: string | number | null | undefined) => { // Added typ
 // Helper function for currency formatting (handles potential K suffix if needed)
 const formatCurrency = (value: string | number | null | undefined, multiplier: number = 1000) => { // Added type, removed unused unit
     if (value === null || value === undefined || value === '' || isNaN(Number(value))) {
-        return <div className="text-right">-</div>;
+        return <div className="">-</div>; // Removed text-right
     }
     try {
         const amount = parseFloat(value as string) * multiplier;
@@ -180,17 +180,17 @@ const formatCurrency = (value: string | number | null | undefined, multiplier: n
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(amount);
-        return <div className="text-right">{formatted}</div>;
+        return <div className="">{formatted}</div>; // Removed text-right
     } catch (e) {
         console.error("Error formatting currency:", value, e);
-        return <div className="text-right">Invalid Value</div>;
+        return <div className="">Invalid Value</div>; // Removed text-right
     }
 }
 
 // Helper function for percentage formatting
 const formatPercentage = (value: string | number | null | undefined) => { // Added type
     if (value === null || value === undefined || value === '' || isNaN(Number(value))) {
-        return <div className="text-right">-</div>;
+        return <div className="">-</div>; // Removed text-right
     }
     try {
         const amount = parseFloat(value as string);
@@ -199,10 +199,10 @@ const formatPercentage = (value: string | number | null | undefined) => { // Add
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         }).format(amount / 100); // Assuming the value is already in percent * 100 format
-        return <div className="text-right">{formatted}</div>;
+        return <div className="">{formatted}</div>; // Removed text-right
     } catch (e) {
         console.error("Error formatting percentage:", value, e);
-        return <div className="text-right">Invalid Value</div>;
+        return <div className="">Invalid Value</div>; // Removed text-right
     }
 }
 
@@ -810,7 +810,7 @@ const allColumns: Record<string, ColumnDef<Institution>> = {
     header: ({ column }) => <DataTableColumnHeader column={column} title="Latitude" />,
     cell: ({ row }) => { // Added type check for toFixed
         const value = row.getValue("latitude");
-        return <div className="text-right">{typeof value === 'number' ? value.toFixed(6) : '-'}</div>;
+        return <div className="">{typeof value === 'number' ? value.toFixed(6) : '-'}</div>; // Removed text-right
     },
     meta: { label: "Location Address Latitude", variant: "range", icon: MapPin },
     enableColumnFilter: true,
@@ -827,7 +827,7 @@ const allColumns: Record<string, ColumnDef<Institution>> = {
     header: ({ column }) => <DataTableColumnHeader column={column} title="Longitude" />,
     cell: ({ row }) => { // Added type check for toFixed
         const value = row.getValue("longitude");
-        return <div className="text-right">{typeof value === 'number' ? value.toFixed(6) : '-'}</div>;
+        return <div className="">{typeof value === 'number' ? value.toFixed(6) : '-'}</div>; // Removed text-right
     },
     meta: { label: "Location Address Longitude", variant: "range", icon: MapPin },
     enableColumnFilter: true,
@@ -905,28 +905,28 @@ const allColumns: Record<string, ColumnDef<Institution>> = {
   offdom: {
     accessorKey: "offdom",
     header: ({ column }) => <DataTableColumnHeader column={column} title="# Dom Offices" />,
-    cell: ({ row }) => <div className="text-right">{row.getValue("offdom") ?? '-'}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("offdom") ?? '-'}</div>, // Removed text-right
     meta: { label: "Number of Domestic Offices", variant: "range", icon: Hash },
     enableColumnFilter: true,
   },
   offfor: {
     accessorKey: "offfor",
     header: ({ column }) => <DataTableColumnHeader column={column} title="# For Offices" />,
-    cell: ({ row }) => <div className="text-right">{row.getValue("offfor") ?? '-'}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("offfor") ?? '-'}</div>, // Removed text-right
     meta: { label: "Number of Foreign Offices", variant: "range", icon: Hash },
     enableColumnFilter: true,
   },
   offices: {
     accessorKey: "offices",
     header: ({ column }) => <DataTableColumnHeader column={column} title="# Offices" />,
-    cell: ({ row }) => <div className="text-right">{row.getValue("offices") ?? '-'}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("offices") ?? '-'}</div>, // Removed text-right
     meta: { label: "Office", variant: "range", icon: Hash },
     enableColumnFilter: true,
   },
   offoa: {
     accessorKey: "offoa",
     header: ({ column }) => <DataTableColumnHeader column={column} title="# US Offices" />,
-    cell: ({ row }) => <div className="text-right">{row.getValue("offoa") ?? '-'}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("offoa") ?? '-'}</div>, // Removed text-right
     meta: { label: "Number of US Offices", variant: "range", icon: Hash },
     enableColumnFilter: true,
   },

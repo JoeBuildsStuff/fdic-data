@@ -158,7 +158,7 @@ properties:
         title: Directly owned by another bank (CERT)
         description: >-
           FDIC certificate number of the parent bank or savings institution
-          with which the reported institution’s financial data has been
+          with which the reported institution's financial data has been
           consolidated. Beginning in March 1997, both the Thrift Financial
           Reports and Call Reports are completed on a fully consolidated
           basis.  Previously, the consolidation of subsidiary depository
