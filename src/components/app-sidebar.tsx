@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        {/* Add User Login*/}
+        {/* TODO: Add User Login Component */}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

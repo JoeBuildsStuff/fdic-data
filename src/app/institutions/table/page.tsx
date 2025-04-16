@@ -404,6 +404,8 @@ export default async function Institutions({
 
   const { data: institutions, error: dataError } = await query;
 
+  console.log("institutions", institutions);
+
   if (dataError) {
     console.error('Error fetching institutions:', dataError);
     return <div className="p-4 text-red-500">Error loading data.</div>;
