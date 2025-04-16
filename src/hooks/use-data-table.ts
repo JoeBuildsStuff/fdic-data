@@ -32,7 +32,7 @@ import * as React from "react";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { getSortingStateParser } from "@/lib/parsers";
 import type { ExtendedColumnSort } from "@/types/data-table";
-import type { AvailableColumn } from "@/app/institutions/components/columns";
+import type { AvailableColumn } from "@/app/institutions/table/components/columns";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const PAGE_KEY = "page";

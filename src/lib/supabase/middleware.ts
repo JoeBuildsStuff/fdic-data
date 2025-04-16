@@ -40,7 +40,12 @@ export async function updateSession(request: NextRequest) {
   if (
     !user &&
     request.nextUrl.pathname !== '/' &&
-    request.nextUrl.pathname !== '/institutions' &&
+    request.nextUrl.pathname !== '/institutions/dashboard' &&
+    request.nextUrl.pathname !== '/institutions/table' &&
+    request.nextUrl.pathname !== '/financials/dashboard' &&
+    request.nextUrl.pathname !== '/financials/table' &&
+    request.nextUrl.pathname !== '/industry/dashboard' &&
+    request.nextUrl.pathname !== '/industry/table' &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/auth')
   ) {

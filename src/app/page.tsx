@@ -1,7 +1,6 @@
+import { redirect } from "next/navigation";
+
 export default function Home() {
-  return (
-    <div className="">
-      FDIC Dashboard
-    </div>
-  );
+  redirect("/institutions/table");
+  return null;
 }

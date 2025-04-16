@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { InstitutionTable } from '@/app/institutions/components/institution-table';
-import { AvailableColumn, Institution } from '@/app/institutions/components/columns';
+import { InstitutionTable } from '@/app/institutions/table/components/institution-table';
+import { AvailableColumn, Institution } from '@/app/institutions/table/components/columns';
 import { type ExtendedColumnSort } from "@/types/data-table";
 import { parseAsInteger, parseAsArrayOf, parseAsString } from 'nuqs/server';
 
@@ -173,8 +173,16 @@ const availableColumns: AvailableColumn[] = [
   // 'insdropdate_raw'
 ];
 
-// Define initially selected columns (adjust as needed)
-const initialSelectedColumns = ['cert', 'estymd', 'name', 'asset', 'dep','eq', 'netinc', 'roa', 'roe' ];
+// Define initially selected columns (using only the specified fields)
+const initialSelectedColumns = [
+  'cert',      // FDIC Certificate #
+  'estymd',    // Established Date
+  'name',      // Institution name
+  'stalp',     // State Alpha code
+  // 'webaddr',   // Primary Internet Web Address
+  'dep',       // Total deposits
+
+];
 
 // Define default sort options using the correct type
 const defaultSortOptions: ExtendedColumnSort<Institution>[] = [{ id: 'asset', desc: true }];
@@ -406,7 +414,6 @@ export default async function Institutions({
   if (!institutions && (count ?? 0) > 0 && (page ?? 1) > 1) {
      return (
        <div className="p-4">
-         <h1 className="text-2xl font-bold mb-4">FDIC Institutions</h1>
          <p>Page {page ?? 1} does not exist. The last page is {totalPages}.</p>
          <Link href={`/institutions?page=${totalPages}`}>
             <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
@@ -418,8 +425,7 @@ export default async function Institutions({
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">FDIC Institutions</h1>
+    <>
         <InstitutionTable
           availableColumns={availableColumns}
           initialSelectedColumns={initialSelectedColumns}
@@ -428,7 +434,7 @@ export default async function Institutions({
           initialSorting={sortOptions}
           initialPageSize={DEFAULT_PAGE_SIZE}
         />
-    </div>
+    </>
   );
 }
   

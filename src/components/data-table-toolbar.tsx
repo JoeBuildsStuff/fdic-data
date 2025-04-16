@@ -4,7 +4,7 @@ import type { Column, Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import * as React from "react";
 import type { Options } from "nuqs";
-import type { AvailableColumn } from "@/app/institutions/components/columns";
+import type { AvailableColumn } from "@/app/institutions/table/components/columns";
 
 import { DataTableDateFilter } from "@/components/data-table-date-filter";
 import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter";
