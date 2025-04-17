@@ -8,7 +8,7 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
 import { useDataTable } from "@/hooks/use-data-table";
 
-import { DataTableAdvancedToolbar } from "@/components/data-table-advanced-toolbar";
+import { DataTableAdvancedToolbar } from "./institutions-table-advanced-toolbar";
 import { DataTableFilterList } from "@/components/data-table-filter-list";
 import { DataTableSortList } from "@/components/data-table-sort-list";
 import type {
@@ -113,6 +113,7 @@ export function InstitutionsTable({
             <DataTableSortList table={table} align="start" />
               <DataTableFilterList
                 table={table}
+                selectedColumns={search.columns}
                 shallow={shallow}
                 debounceMs={debounceMs}
                 throttleMs={throttleMs}

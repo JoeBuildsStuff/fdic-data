@@ -13,9 +13,11 @@ export const searchParamsCache = createSearchParamsCache({
   page: parseAsInteger.withDefault(1),
   perPage: parseAsInteger.withDefault(10),
   sort: getSortingStateParser<Institution>().withDefault([
-    { id: "name", desc: true },
+    { id: "dep", desc: true },
   ]),
-  filters: getFiltersStateParser().withDefault([]),
+  filters: getFiltersStateParser<Institution>().withDefault([
+    { id: 'active', operator: 'eq', value: '1', variant: 'select', filterId: 'default-active' }
+  ]),
   joinOperator: parseAsStringEnum(["and", "or"]).withDefault("and"),
   // define columns to retrieve from the database
   columns: parseAsArrayOf(z.string()).withDefault([

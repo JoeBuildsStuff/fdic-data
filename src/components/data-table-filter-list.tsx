@@ -81,6 +81,7 @@ interface DataTableFilterListProps<TData>
   debounceMs?: number;
   throttleMs?: number;
   shallow?: boolean;
+  selectedColumns?: string[];
 }
 
 export function DataTableFilterList<TData>({
@@ -88,6 +89,7 @@ export function DataTableFilterList<TData>({
   debounceMs = DEBOUNCE_MS,
   throttleMs = THROTTLE_MS,
   shallow = true,
+  selectedColumns = [],
   ...props
 }: DataTableFilterListProps<TData>) {
   const id = React.useId();
@@ -100,7 +102,7 @@ export function DataTableFilterList<TData>({
     return table
       .getAllColumns()
       .filter((column) => column.columnDef.enableColumnFilter);
-  }, [table]);
+  }, [table, selectedColumns]);
 
   const [filters, setFilters] = useQueryState(
     FILTERS_KEY,

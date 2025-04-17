@@ -31,16 +31,30 @@ function applySupabaseFilters(
       const value = f.value;
       // Use operator names matching GetInstitutionsSchema['filters'] type
       switch (f.operator) {
-        case 'iLike': return `${columnName}.ilike.%${value}%`; // Use Supabase 'ilike' syntax
-        case 'eq': return `${columnName}.eq.${value}`;
-        case 'ne': return `${columnName}.neq.${value}`; // Use Supabase 'neq' syntax
-        case 'gt': return `${columnName}.gt.${value}`;
-        case 'gte': return `${columnName}.gte.${value}`;
-        case 'lt': return `${columnName}.lt.${value}`;
-        case 'lte': return `${columnName}.lte.${value}`;
-        case 'inArray': // Match 'inArray' from parser type
+        case 'iLike':
+          if (Array.isArray(value)) return null; // Skip if value is array
+          return `${columnName}.ilike.%${value}%`;
+        case 'eq':
+          if (Array.isArray(value)) return null; // Skip if value is array
+          return `${columnName}.eq.${value}`;
+        case 'ne':
+          if (Array.isArray(value)) return null; // Skip if value is array
+          return `${columnName}.neq.${value}`;
+        case 'gt':
+          if (Array.isArray(value)) return null; // Skip if value is array
+          return `${columnName}.gt.${value}`;
+        case 'gte':
+          if (Array.isArray(value)) return null; // Skip if value is array
+          return `${columnName}.gte.${value}`;
+        case 'lt':
+          if (Array.isArray(value)) return null; // Skip if value is array
+          return `${columnName}.lt.${value}`;
+        case 'lte':
+          if (Array.isArray(value)) return null; // Skip if value is array
+          return `${columnName}.lte.${value}`;
+        case 'inArray':
           if (Array.isArray(value)) {
-            return `${columnName}.in.(${value.join(',')})`; // Use Supabase 'in' syntax
+            return `${columnName}.in.(${value.join(',')})`;
           } else {
              console.warn(`'inArray' operator requires an array value for column ${columnName}`);
              return null;
@@ -65,14 +79,42 @@ function applySupabaseFilters(
       const value = f.value;
       // Use operator names matching GetInstitutionsSchema['filters'] type
       switch (f.operator) {
-        case 'iLike': query = query.ilike(columnName, `%${value}%`); break;
-        case 'eq': query = query.eq(columnName, value); break;
-        case 'ne': query = query.neq(columnName, value); break;
-        case 'gt': query = query.gt(columnName, value); break;
-        case 'gte': query = query.gte(columnName, value); break;
-        case 'lt': query = query.lt(columnName, value); break;
-        case 'lte': query = query.lte(columnName, value); break;
-        case 'inArray': // Match 'inArray' from parser type
+        case 'iLike':
+          if (!Array.isArray(value)) {
+            query = query.ilike(columnName, `%${value}%`);
+          }
+          break;
+        case 'eq':
+          if (!Array.isArray(value)) {
+            query = query.eq(columnName, value);
+          }
+          break;
+        case 'ne':
+          if (!Array.isArray(value)) {
+            query = query.neq(columnName, value);
+          }
+          break;
+        case 'gt':
+          if (!Array.isArray(value)) {
+            query = query.gt(columnName, value);
+          }
+          break;
+        case 'gte':
+          if (!Array.isArray(value)) {
+            query = query.gte(columnName, value);
+          }
+          break;
+        case 'lt':
+          if (!Array.isArray(value)) {
+            query = query.lt(columnName, value);
+          }
+          break;
+        case 'lte':
+          if (!Array.isArray(value)) {
+            query = query.lte(columnName, value);
+          }
+          break;
+        case 'inArray':
           if (Array.isArray(value)) {
              query = query.in(columnName, value);
           } else {
@@ -124,9 +166,13 @@ async function fetchInstitutionsData(
 
     if (input.sort.length > 0) {
       input.sort.forEach(item => {
-        query = query.order(item.id as string, { ascending: !item.desc });
+        const ascending = !item.desc;
+        // Treat nulls as the smallest value: NULLS FIRST for asc, NULLS LAST for desc
+        query = query.order(item.id as string, { ascending: ascending, nullsFirst: ascending });
       });
     } else {
+      // Keep default sort as name ascending (null handling might not be critical here)
+      // If a different default involving numeric/date is desired, apply nullsFirst logic here too.
       query = query.order('name', { ascending: true });
     }
 
