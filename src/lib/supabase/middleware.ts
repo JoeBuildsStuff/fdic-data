@@ -42,6 +42,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname !== '/' &&
     request.nextUrl.pathname !== '/institutions/dashboard' &&
     request.nextUrl.pathname !== '/institutions/table' &&
+    request.nextUrl.pathname !== '/institutions2' &&
     request.nextUrl.pathname !== '/financials/dashboard' &&
     request.nextUrl.pathname !== '/financials/table' &&
     request.nextUrl.pathname !== '/industry/dashboard' &&

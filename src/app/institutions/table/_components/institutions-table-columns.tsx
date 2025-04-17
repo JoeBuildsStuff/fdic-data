@@ -4,161 +4,14 @@ import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-table-column-header"
 import { Building2, MapPin, Hash, Link as LinkIcon, Calendar, CheckCircle, XCircle, Circle, TrendingUp, Percent, Banknote } from "lucide-react"
 
+// Import the authoritative Institution type from schema.ts
+import type { Institution } from "../_lib/schema";
+
 // Define and export the AvailableColumn type here
+// It will now correctly use the imported Institution type
 export interface AvailableColumn {
   id: keyof Institution | string;
   label: string;
-}
-
-// This type is based on the institution properties from the YAML file
-export type Institution = {
-  active?: string | null; // Institution Status ('1' or '0')
-  address?: string | null; // Street Address
-  asset?: string | null; // Total Assets (number as string)
-  bkclass?: string | null; // Institution Class Code
-  cb?: string | null; // Community Bank flag ('1' or '0')
-  cbsa?: string | null; // Core Based Statistical Area Name
-  cbsa_div?: string | null; // Metropolitan Divisions Name
-  cbsa_div_flg?: string | null; // Metropolitan Divisions Flag ('1' or '0')
-  cbsa_div_no?: string | null; // Metropolitan Divisions Number
-  cbsa_metro?: string | null; // Metropolitan Division Number
-  cbsa_metro_flg?: string | null; // Metropolitan Division Flag ('1' or '0')
-  cbsa_metro_name?: string | null; // Metropolitan Division Name
-  cbsa_micro_flg?: string | null; // Micropolitan Division Flag ('1' or '0')
-  cbsa_no?: string | null; // Core Based Statistical Areas Number
-  cert?: string | null; // FDIC Certificate #
-  certcons?: string | null; // Directly owned by another bank (CERT)
-  cfpbeffdte?: string | null; // CFPB Effective Date (date string)
-  cfpbenddte?: string | null; // CFPB End Date (date string)
-  cfpbflag?: string | null; // CFPB Flag ('1' or '0')
-  change1?: string | null; // Change Code 1
-  change2?: string | null; // Change Code 2
-  change3?: string | null; // Change Code 3
-  change4?: string | null; // Change Code 4
-  change5?: string | null; // Change Code 5
-  change6?: string | null; // Change Code 6
-  change7?: string | null; // Change Code 7
-  change8?: string | null; // Change Code 8
-  change9?: string | null; // Change Code 9
-  change10?: string | null; // Change Code 10
-  change11?: string | null; // Change Code 11
-  change12?: string | null; // Change Code 12
-  change13?: string | null; // Change Code 13
-  change14?: string | null; // Change Code 14
-  change15?: string | null; // Change Code 15
-  charter?: string | null; // OCC Charter Number
-  chrtagnt?: string | null; // Chartering Agency Code
-  city?: string | null; // City
-  cityhcr?: string | null; // City of High Holder
-  clcode?: string | null; // Numeric class code
-  cmsa_no?: string | null; // Consolidated Metropolitan Statistical Division Number
-  cmsa?: string | null; // Consolidated Metropolitan Statistical Area Name
-  conserve?: string | null; // Conservatorship flag ('1' or '0')
-  county?: string | null; // County Name
-  csa?: string | null; // Combined Statistical Area Name
-  csa_no?: string | null; // Combined Statistical Area Number
-  csa_flg?: string | null; // CSA Area Flag ('1' or '0')
-  dateupdt?: string | null; // Last update date (date string)
-  denovo?: string | null; // Denovo Institution flag ('1' or '0')
-  dep?: string | null; // Total deposits (number as string)
-  depdom?: string | null; // Deposits held in domestic offices (number as string)
-  docket?: string | null; // OTS Docket Number
-  effdate?: string | null; // Last Structure Change Effective Date (date string)
-  endefymd?: string | null; // End date (date string)
-  eq?: string | null; // Equity capital (number as string)
-  estymd?: string | null; // Established Date (date string)
-  fdicdbs?: string | null; // FDIC Geographic Region Code
-  fdicregn?: string | null; // FDIC Supervisory Region Name
-  fdicsupv?: string | null; // Federal Reserve District Name
-  fed?: string | null; // Federal Reserve ID Number (District Code)
-  fed_rssd?: string | null; // Federal Reserve ID Number (RSSD)
-  fedchrtr?: string | null; // Federal charter flag ('1' or '0')
-  fldoff?: string | null; // FDIC Field Office Name
-  form31?: string | null; // FFIEC Call Report 31 Filer flag ('1' or '0')
-  hctmult?: string | null; // Bank Holding Company Type flag ('1' or '0')
-  iba?: string | null; // Insured offices of foreign banks flag ('1' or '0')
-  inactive?: string | null; // Inactive flag ('1' or '0')
-  insagnt1?: string | null; // Primary Insurance Agency Code
-  insagnt2?: string | null; // Secondary Insurance Fund Code
-  insbif?: string | null; // Bank Insurance Fund flag ('1' or '0')
-  inscoml?: string | null; // Insured commercial banks flag ('1' or '0')
-  insdate?: string | null; // Date of Deposit Insurance (date string)
-  insdropdate?: string | null; // Date of Dropped Deposit Insurance (date string)
-  insdif?: string | null; // Deposit Insurance Fund member flag ('1' or '0')
-  insfdic?: string | null; // FDIC Insured flag ('1' or '0') // Likely always 1 for this dataset
-  inssaif?: string | null; // SAIF Insured flag ('1' or '0')
-  inssave?: string | null; // Insured Savings Institution flag ('1' or '0')
-  instag?: string | null; // Agricultural lending institution indicator ('1' or '0')
-  instcrcd?: string | null; // Credit Card Institutions flag ('1' or '0')
-  latitude?: number | null; // Location Address Latitude (using number based on context)
-  law_sasser_flg?: string | null; // Law Sasser Flag ('1' or '0')
-  longitude?: number | null; // Location Address Longitude (using number based on context)
-  mdi_status_code?: string | null; // Minority Status Code
-  mdi_status_desc?: string | null; // Minority Status Description
-  msa?: string | null; // Metropolitan Statistical Area (MSA) Name
-  msa_no?: string | null; // Metropolitan Statistical Area Number
-  mutual?: string | null; // Ownership Type flag ('1' or '0')
-  name?: string | null; // Institution name
-  namehcr?: string | null; // Bank Holding Company (Regulatory Top Holder) Name
-  netinc?: string | null; // Net income (number as string)
-  netincq?: string | null; // Net income - quarterly (number as string)
-  newcert?: string | null; // New certificate number
-  oakar?: string | null; // Oakar Institutions flag ('1' or '0')
-  occdist?: string | null; // Office of the Comptroller District Code
-  offdom?: string | null; // Number of Domestic Offices (number as string)
-  offfor?: string | null; // Number of Foreign Offices (number as string)
-  offices?: string | null; // Office (number as string?) - Check YAML, marked as number but description vague
-  offoa?: string | null; // Number of US Offices (number as string)
-  otsdist?: string | null; // OTS District Code
-  otsregnm?: string | null; // Office of Thrift Supervision Region Name
-  parcert?: string | null; // Directly owned by another bank (CERT) - parent cert
-  procdate?: string | null; // Last Structure Change Process Date (date string)
-  qbprcoml?: string | null; // Quarterly Banking Profile Commercial Bank Region Name
-  regagnt?: string | null; // Primary Regulator Code
-  regagent2?: string | null; // Secondary Regulator Code
-  repdte?: string | null; // Report Date (date string)
-  risdate?: string | null; // Report Date (date string, same as repdte?)
-  roa?: string | null; // Return on assets (ROA) (number as string, likely percent)
-  roaptx?: string | null; // Pretax return on assets (number as string, likely percent)
-  roaptxq?: string | null; // Quarterly Pretax return on assets (number as string, likely percent)
-  roaq?: string | null; // Quarterly return on assets (number as string, likely percent)
-  roe?: string | null; // Return on Equity (ROE) (number as string, likely percent)
-  roeq?: string | null; // Quarterly return on equity (number as string, likely percent)
-  rssdhcr?: string | null; // RSSDID - High Regulatory Holder ID
-  rundate?: string | null; // Run Date (date string)
-  sasser?: string | null; // Sasser Institutions flag ('1' or '0')
-  specgrp?: string | null; // Asset Concentration Hierarchy Code (number as string)
-  specgrpn?: string | null; // Specialization Group Name
-  stalp?: string | null; // State Alpha code (e.g., 'CA')
-  stalphcr?: string | null; // Regulatory holding company state location (e.g., 'CA')
-  stchrtr?: string | null; // State Charter flag ('1' or '0')
-  stcnty?: string | null; // State and county number (FIPS)
-  stname?: string | null; // State Name (e.g., 'California')
-  stnum?: string | null; // State Number (FIPS)
-  subchaps?: string | null; // Subchapter S Corporations flag ('1' or '0')
-  suprv_fd?: string | null; // Supervisory Region Number Code
-  te01n528?: string | null; // Web Site URL 01
-  te02n528?: string | null; // Web Site URL 02
-  te03n528?: string | null; // Web Site URL 03
-  te04n528?: string | null; // Web Site URL 04
-  te05n528?: string | null; // Web Site URL 05
-  te06n528?: string | null; // Web Site URL 06
-  te07n528?: string | null; // Web Site URL 07
-  te08n528?: string | null; // Web Site URL 08
-  te09n528?: string | null; // Web Site URL 09
-  te10n528?: string | null; // Web Site URL 10
-  te01n529?: string | null; // Trade Name 01
-  te02n529?: string | null; // Trade Name 02
-  te03n529?: string | null; // Trade Name 03
-  te04n529?: string | null; // Trade Name 04
-  te05n529?: string | null; // Trade Name 05
-  te06n529?: string | null; // Trade Name 06
-  tract?: string | null; // TRACT - Meaning unclear from YAML ('')
-  trust?: string | null; // Trust Powers Code
-  ultcert?: string | null; // Ultimate Cert Number
-  uninum?: string | null; // FDIC's unique number
-  webaddr?: string | null; // Primary Internet Web Address
-  zip?: string | null; // Zip Code
 }
 
 // Helper function for simple flag rendering
@@ -252,6 +105,7 @@ const renderUrl = (value: string | number | null | undefined) => { // Added type
 }
 
 // Define ALL possible columns in a Record keyed by their accessorKey/id
+// The ColumnDef<Institution> generic will now use the imported type
 const allColumns: Record<string, ColumnDef<Institution>> = {
   cert: {
     accessorKey: "cert",
