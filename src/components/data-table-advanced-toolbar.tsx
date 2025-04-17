@@ -4,7 +4,7 @@ import type * as React from "react";
 
 import { DataTableViewOptions } from "@/components/data-table-view-options";
 import { cn } from "@/lib/utils";
-import type { AvailableColumn } from "@/app/institutions/table/components/columns";
+import type { AvailableColumn } from "@/app/institutions/table/_components/institutions-table-columns";
 import type { Options } from "nuqs";
 
 interface DataTableAdvancedToolbarProps

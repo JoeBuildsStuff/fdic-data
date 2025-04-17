@@ -19,7 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import * as React from "react";
-import type { AvailableColumn } from "@/app/institutions/table/components/columns";
+import type { AvailableColumn } from "@/app/institutions/table/_components/institutions-table-columns";
 import type { Options } from "nuqs";
 
 interface DataTableViewOptionsProps {
