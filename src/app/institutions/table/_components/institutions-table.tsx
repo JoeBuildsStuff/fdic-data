@@ -1,6 +1,6 @@
 "use client";
 
-import type { Institution } from "@/app/institutions2/_lib/schema";
+import type { Institution } from "../_lib/schema";
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ColumnDef } from "@tanstack/react-table";

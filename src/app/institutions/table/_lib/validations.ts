@@ -1,4 +1,4 @@
-import { type Institution } from "@/app/institutions2/_lib/schema";
+import { type Institution } from "./schema";
 import {
   createSearchParamsCache,
   parseAsArrayOf,
