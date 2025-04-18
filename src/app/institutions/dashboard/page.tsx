@@ -1,6 +1,18 @@
 import { createClient } from '@/lib/supabase/server'; // Adjust path if necessary
-import { getKeyStatistics, getBankAgeDistribution, getBankEstablishmentTrend } from './_lib/queries';
-import { ChartCard } from './column-chart-card'; // Import ChartCard
+import { 
+  getKeyStatistics, 
+  getBankAgeDistribution, 
+  getBankEstablishmentTrend,
+  getBankClassData,
+  getCommunityBankData,
+  getRegulatorAgentData,
+  getFederalCharterData,
+  getStateCharterData,
+  getCharteringAgencyData,
+  getSpecializationNameData
+} from './_lib/queries';
+import { ColumnChartCard } from './column-chart-card';
+import { BarChartCard } from './bar-chart-card'; 
 import {
   Card,
   CardDescription,
@@ -8,7 +20,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"; // Assuming Shadcn UI components path
-// import { LineChartCard } from './line-chart-card';
+import {
+  ChartConfig
+} from "@/components/ui/chart";
+
 // Helper function for formatting numbers
 function formatNumber(num: number): string {
   // Handle potential null/undefined inputs from data, though getKeyStatistics provides defaults
@@ -66,13 +81,87 @@ function groupEstablishmentsByDecade(data: Array<{ year: string; count: number }
     });
 }
 
+// Helper to convert Record<string, number> to columnar chart data
+function convertToColumnChartData(data: Record<string, number>): Array<Record<string, string | number>> {
+  return Object.entries(data)
+    .map(([category, value]) => ({ 
+      category, 
+      value 
+    }))
+    // Sort by value in descending order to make the chart more readable
+    .sort((a, b) => (b.value as number) - (a.value as number))
+    // Optionally limit to top N if there are too many categories
+    .slice(0, 10);
+}
+
+// Map for bank class descriptions
+const bankClassDescriptions: Record<string, string> = {
+  'N': 'National Charter, Fed Member (OCC)',
+  'NM': 'State Charter, Fed Non-Member (FDIC)',
+  'SM': 'State Charter, Fed Member (FRB)',
+  'SB': 'Federal Savings Banks',
+  'SA': 'Savings Associations',
+  'OI': 'Insured U.S. Branch of Foreign Institution',
+  'unknown': 'Unknown Classification'
+};
+
+// Enhances bank class data with readable names for column chart
+function enhanceBankClassColumnData(data: Record<string, number>): Array<Record<string, string | number>> {
+  return Object.entries(data)
+    .map(([code, value]) => ({ 
+      category: bankClassDescriptions[code] || code, 
+      value,
+      code // Store the original code for potential use in tooltips or links
+    }))
+    .sort((a, b) => (b.value as number) - (a.value as number));
+}
+
+// Function to generate ChartConfig for BarChartCard from columnar data
+function generateBarChartConfig(data: Array<Record<string, string | number>>, categoryKey: string, valueKey: string, defaultColor = "hsl(var(--chart-1))"): ChartConfig {
+  const config: ChartConfig = {
+    [valueKey]: { // Entry for the value axis
+      label: "Value", // Generic label, adjust if needed
+      color: defaultColor // Use a default/base color for the value axis itself if needed by the chart component
+    }
+  };
+  data.forEach((item, index) => {
+    const category = item[categoryKey] as string;
+    // Assign colors systematically, maybe using chart variables
+    const color = `hsl(var(--chart-${(index % 8) + 1}))`; // Cycle through chart colors
+    config[category] = {
+      label: category, // Use the category name as the label
+      color: color,
+    };
+  });
+  return config satisfies ChartConfig;
+}
+
 export default async function InstitutionsDashboardPage() {
   const supabase = await createClient();
+  
   // Fetch all data in parallel
-  const [stats, bankAgeData, establishmentTrendData] = await Promise.all([
+  const [
+    stats, 
+    bankAgeData, 
+    establishmentTrendData,
+    bankClassData,
+    communityBankData,
+    regulatorAgentData,
+    federalCharterData,
+    stateCharterData,
+    charteringAgencyData,
+    specializationNameData
+  ] = await Promise.all([
     getKeyStatistics(supabase),
     getBankAgeDistribution(supabase),
-    getBankEstablishmentTrend(supabase)
+    getBankEstablishmentTrend(supabase),
+    getBankClassData(supabase),
+    getCommunityBankData(supabase),
+    getRegulatorAgentData(supabase),
+    getFederalCharterData(supabase),
+    getStateCharterData(supabase),
+    getCharteringAgencyData(supabase),
+    getSpecializationNameData(supabase)
   ]);
 
   // Group the establishment data by decades
@@ -83,6 +172,25 @@ export default async function InstitutionsDashboardPage() {
   const weeklyUpdateDate = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'numeric', day: 'numeric' }).format(currentDate);
   // Using the date provided in the example text for quarterly data
   const quarterlyUpdateDate = '12/31/2024'; // TODO: Replace with dynamic date if needed
+
+  // Prepare column chart data
+  const bankClassColumnData = enhanceBankClassColumnData(bankClassData);
+  const communityBankColumnData = convertToColumnChartData(communityBankData);
+  const regulatorAgentColumnData = convertToColumnChartData(regulatorAgentData);
+  const charterTypesColumnData = convertToColumnChartData({
+    'Federal Charter': federalCharterData['1'] || 0,
+    'State Charter': stateCharterData['1'] || 0
+  });
+  const charteringAgencyColumnData = convertToColumnChartData(charteringAgencyData);
+  const specializationColumnData = convertToColumnChartData(specializationNameData);
+
+  // Generate ChartConfigs for the Bar Charts
+  const bankClassBarConfig = generateBarChartConfig(bankClassColumnData, 'category', 'value', 'hsl(var(--chart-3))');
+  const communityBankBarConfig = generateBarChartConfig(communityBankColumnData, 'category', 'value', 'hsl(var(--chart-4))');
+  const regulatorAgentBarConfig = generateBarChartConfig(regulatorAgentColumnData, 'category', 'value', 'hsl(var(--chart-5))');
+  const charterTypesBarConfig = generateBarChartConfig(charterTypesColumnData, 'category', 'value', 'hsl(var(--chart-6))');
+  const charteringAgencyBarConfig = generateBarChartConfig(charteringAgencyColumnData, 'category', 'value', 'hsl(var(--chart-7))');
+  const specializationBarConfig = generateBarChartConfig(specializationColumnData, 'category', 'value', 'hsl(var(--chart-8))');
 
   return (
     <div className="flex flex-col gap-4">
@@ -145,10 +253,10 @@ export default async function InstitutionsDashboardPage() {
         </Card>
       </div>
 
-      {/* Charts Section */}
+      {/* Charts Section - Row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bank Age Distribution Chart */}
-        <ChartCard 
+        <ColumnChartCard 
             title="Institution Age Distribution" 
             description={`Distribution of FDIC insured institutions by age group (Data as of ${weeklyUpdateDate})`}
             chartData={bankAgeData as unknown as Record<string, string | number>[]} // Assert type to satisfy ChartCard prop type
@@ -159,7 +267,7 @@ export default async function InstitutionsDashboardPage() {
         />
 
         {/* Bank Establishment Trend Chart - Now as Column Chart with decades */}
-        <ChartCard 
+        <ColumnChartCard 
             title="New Bank Establishments by Decade" 
             description={`Number of new bank formations per decade (Data as of ${weeklyUpdateDate})`}
             chartData={establishmentByDecadeData as unknown as Record<string, string | number>[]} // Now using the grouped data
@@ -170,7 +278,83 @@ export default async function InstitutionsDashboardPage() {
         />
       </div>
 
-      
+      {/* Charts Section - Row 2 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Bank Class Distribution - Now Bar Chart */}
+        <BarChartCard 
+          title="Institution Classification"
+          description={`Distribution by FDIC Bank Class (${weeklyUpdateDate})`}
+          chartData={bankClassColumnData}
+          chartConfig={bankClassBarConfig} // Pass generated config
+          yAxisKey="category" // Was xAxisKey
+          yAxisWidth={200}
+          xAxisKey="value"    // Was barKey
+          barKey="value"      // The value being plotted
+          // Footer props can be added if needed
+        />
+
+        {/* Community Bank Distribution - Now Bar Chart */}
+        <BarChartCard 
+          title="Community Banks"
+          description={`Institutions by Community Bank Status (${weeklyUpdateDate})`}
+          chartData={communityBankColumnData}
+          chartConfig={communityBankBarConfig} // Pass generated config
+          yAxisKey="category"
+          xAxisKey="value"
+          barKey="value"
+        />
+      </div>
+
+      {/* Charts Section - Row 3 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Regulator Agent Distribution - Now Bar Chart */}
+        <BarChartCard 
+          title="Primary Regulators"
+          description={`Institutions by Primary Regulatory Agency (${weeklyUpdateDate})`}
+          chartData={regulatorAgentColumnData}
+          chartConfig={regulatorAgentBarConfig} // Pass generated config
+          yAxisKey="category"
+          xAxisKey="value"
+          barKey="value"
+        />
+
+        {/* Charter Type Distribution - Now Bar Chart */}
+        <BarChartCard 
+          title="Charter Types"
+          description={`Federal vs State Charters (${weeklyUpdateDate})`}
+          chartData={charterTypesColumnData}
+          chartConfig={charterTypesBarConfig} // Pass generated config
+          yAxisKey="category"
+          xAxisKey="value"
+          barKey="value"
+        />
+      </div>
+
+      {/* Charts Section - Row 4 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Chartering Agency Distribution - Now Bar Chart */}
+        <BarChartCard 
+          title="Chartering Agencies"
+          description={`Distribution by Chartering Authority (${weeklyUpdateDate})`}
+          chartData={charteringAgencyColumnData}
+          chartConfig={charteringAgencyBarConfig} // Pass generated config
+          yAxisKey="category"
+          xAxisKey="value"
+          barKey="value"
+        />
+
+        {/* Specialization Distribution - Now Bar Chart */}
+        <BarChartCard 
+          title="Institution Specializations"
+          description={`Distribution by Business Focus (${weeklyUpdateDate})`}
+          chartData={specializationColumnData}
+          chartConfig={specializationBarConfig} // Pass generated config
+          yAxisWidth={200}
+          yAxisKey="category"
+          xAxisKey="value"
+          barKey="value"
+        />
+      </div>
     </div>
   );
 }

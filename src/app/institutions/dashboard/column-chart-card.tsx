@@ -22,7 +22,7 @@ import {
 type ChartDataItem = Record<string, string | number>;
 
 // Props for the ChartCard component
-interface ChartCardProps {
+interface ColumnChartCardProps {
   title: string;
   description: string;
   chartData: ChartDataItem[]; // Use the flexible type
@@ -32,7 +32,7 @@ interface ChartCardProps {
   barColor?: string; // Optional color for the bar
 }
 
-export function ChartCard({ 
+export function ColumnChartCard({ 
   title, 
   description, 
   chartData, 
@@ -40,7 +40,7 @@ export function ChartCard({
   barKey, 
   barLabel,
   barColor = "hsl(var(--chart-1))" // Default color
-}: ChartCardProps) {
+}: ColumnChartCardProps) {
 
   // Dynamically create chartConfig based on props
   const chartConfig = {
