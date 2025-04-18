@@ -27,10 +27,10 @@ const navMain = [
       icon: Building2,
       isActive: true,
       items: [
-        // {
-        //   title: "Dashboard",
-        //   url: "/institutions/dashboard",
-        // },
+        {
+          title: "Dashboard",
+          url: "/institutions/dashboard",
+        },
         {
           title: "Table",
           url: "/institutions/table",

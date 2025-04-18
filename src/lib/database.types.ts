@@ -501,7 +501,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_bank_age_distribution: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          age_range: string
+          count: number
+        }[]
+      }
+      get_key_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_assets: number
+          total_deposits: number
+          total_branches: number
+          total_institutions: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
