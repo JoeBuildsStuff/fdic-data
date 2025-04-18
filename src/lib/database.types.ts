@@ -508,6 +508,13 @@ export type Database = {
           count: number
         }[]
       }
+      get_bank_deposit_distribution: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          deposit_range: string
+          count: number
+        }[]
+      }
       get_bank_establishment_trend: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -522,6 +529,38 @@ export type Database = {
           total_deposits: number
           total_branches: number
           total_institutions: number
+        }[]
+      }
+      get_market_share_of_top_assets: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          group_name: string
+          percentage_of_total: number
+          bank_count: number
+        }[]
+      }
+      get_market_share_of_top_deposits: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          group_name: string
+          percentage_of_total: number
+          bank_count: number
+        }[]
+      }
+      get_market_share_of_top_eq: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          group_name: string
+          percentage_of_total: number
+          bank_count: number
+        }[]
+      }
+      get_market_share_of_top_netinc: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          group_name: string
+          percentage_of_total: number
+          bank_count: number
         }[]
       }
     }

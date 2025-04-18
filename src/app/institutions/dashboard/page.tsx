@@ -9,17 +9,16 @@ import {
   getFederalCharterData,
   getStateCharterData,
   getCharteringAgencyData,
-  getSpecializationNameData
+  getSpecializationNameData,
+  getMarketShareAssets,
+  getMarketShareDeposits,
+  getMarketShareEquity,
+  getMarketShareNetIncome
 } from './_lib/queries';
 import { ColumnChartCard } from './column-chart-card';
 import { BarChartCard } from './bar-chart-card'; 
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"; // Assuming Shadcn UI components path
+import { MarketShareCard } from './market-share-card'; // Import the new component
+import { StatisticCard } from './statistic-card'; // Import the new StatisticCard component
 import {
   ChartConfig
 } from "@/components/ui/chart";
@@ -164,6 +163,19 @@ export default async function InstitutionsDashboardPage() {
     getSpecializationNameData(supabase)
   ]);
 
+  // Fetch market share data in parallel (could be combined with above)
+  const [
+    marketShareAssetsData,
+    marketShareDepositsData,
+    marketShareEquityData,
+    marketShareNetIncomeData
+  ] = await Promise.all([
+    getMarketShareAssets(supabase),
+    getMarketShareDeposits(supabase),
+    getMarketShareEquity(supabase),
+    getMarketShareNetIncome(supabase)
+  ]);
+
   // Group the establishment data by decades
   const establishmentByDecadeData = groupEstablishmentsByDecade(establishmentTrendData);
 
@@ -196,61 +208,59 @@ export default async function InstitutionsDashboardPage() {
     <div className="flex flex-col gap-4">
       {/* Key Statistics Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Total Institutions */}
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardDescription>Total Insured Institutions</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {formatNumber(stats.totalInstitutions)}
-            </CardTitle>
-          </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="line-clamp-1 flex font-medium">Total Institutions</div>
-            <div className="text-muted-foreground">Data as of {weeklyUpdateDate}</div>
-          </CardFooter>
-        </Card>
+        {/* Replace individual cards with the reusable component */}
+        <StatisticCard 
+          title={formatNumber(stats.totalInstitutions)}
+          description="Total Insured Institutions"
+          footerText="Total Institutions"
+          updateDate={weeklyUpdateDate}
+        />
+        <StatisticCard 
+          title={formatNumber(stats.totalBranches)}
+          description="Total Insured Branch Offices"
+          footerText="Total Branches"
+          updateDate={weeklyUpdateDate}
+        />
+        <StatisticCard 
+          title={formatMillionsCurrency(stats.totalAssets)}
+          description="Total Assets"
+          footerText="Millions $USD"
+          updateDate={quarterlyUpdateDate}
+        />
+        <StatisticCard 
+          title={formatMillionsCurrency(stats.totalDeposits)}
+          description="Total Deposits"
+          footerText="Millions $USD"
+          updateDate={quarterlyUpdateDate}
+        />
+      </div>
 
-        {/* Card 2: Total Branches */}
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardDescription>Total Insured Branch Offices</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {formatNumber(stats.totalBranches)}
-            </CardTitle>
-          </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="line-clamp-1 flex font-medium">Total Branches</div>
-            <div className="text-muted-foreground">Data as of {weeklyUpdateDate}</div>
-          </CardFooter>
-        </Card>
-
-        {/* Card 3: Total Assets */}
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardDescription>Total Assets</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {formatMillionsCurrency(stats.totalAssets)}
-            </CardTitle>
-          </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="line-clamp-1 flex font-medium">Millions $USD</div>
-            <div className="text-muted-foreground">Data as of {quarterlyUpdateDate}</div>
-          </CardFooter>
-        </Card>
-
-        {/* Card 4: Total Deposits */}
-        <Card className="shadow-none ">
-          <CardHeader>
-            <CardDescription>Total Deposits</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {formatMillionsCurrency(stats.totalDeposits)}
-            </CardTitle>
-          </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="flex font-medium">Millions $USD</div>
-            <div className="text-muted-foreground">Data as of {quarterlyUpdateDate}</div>
-          </CardFooter>
-        </Card>
+      {/* Market Share Section - Row 5 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MarketShareCard 
+          title="Asset Concentration"
+          description="Market share held by top institutions"
+          data={marketShareAssetsData}
+          updateDate={quarterlyUpdateDate}
+        />
+        <MarketShareCard 
+          title="Deposit Concentration"
+          description="Market share held by top institutions"
+          data={marketShareDepositsData}
+          updateDate={quarterlyUpdateDate}
+        />
+        <MarketShareCard 
+          title="Equity Concentration"
+          description="Market share held by top institutions"
+          data={marketShareEquityData}
+          updateDate={quarterlyUpdateDate}
+        />
+        <MarketShareCard 
+          title="Net Income Concentration"
+          description="Market share held by top institutions"
+          data={marketShareNetIncomeData}
+          updateDate={quarterlyUpdateDate}
+        />
       </div>
 
       {/* Charts Section - Row 1 */}
@@ -355,6 +365,7 @@ export default async function InstitutionsDashboardPage() {
           barKey="value"
         />
       </div>
+
     </div>
   );
 }

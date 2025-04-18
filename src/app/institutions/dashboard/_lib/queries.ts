@@ -24,6 +24,13 @@ export interface BankEstablishmentTrendItem {
     count: number;
 }
 
+// Define the structure for market share data items
+export interface MarketShareItem {
+    group_name: string;
+    percentage_of_total: number;
+    bank_count: number;
+}
+
 // Fetch the key statistics data using the RPC function
 async function fetchKeyStatisticsData(
   supabase: SupabaseClient<Database>
@@ -762,3 +769,233 @@ export async function getSpecializationCodeData(
         return {}; // Return empty object on error
     }
 }
+
+// Fetch market share of top assets data using the RPC function
+async function fetchMarketShareAssetsData(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    try {
+        const { data, error } = await supabase
+            .schema('fdic_data')
+            .rpc('get_market_share_of_top_assets');
+
+        if (error) {
+            console.error("Error fetching market share (assets) via RPC:", error);
+            throw error;
+        }
+
+        if (!data || !Array.isArray(data)) {
+            console.warn("No data or invalid data returned from get_market_share_of_top_assets RPC call.");
+            return [];
+        }
+
+        // Ensure the returned values match the expected type
+        return data.map((item: Partial<MarketShareItem>) => ({
+            group_name: String(item.group_name ?? 'Unknown'),
+            percentage_of_total: Number(item.percentage_of_total ?? 0),
+            bank_count: Number(item.bank_count ?? 0)
+        }));
+
+    } catch (err) {
+        console.error("Error in fetchMarketShareAssetsData:", { err });
+        return [];
+    }
+}
+
+// Fetch market share of top deposits data using the RPC function
+async function fetchMarketShareDepositsData(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    try {
+        const { data, error } = await supabase
+            .schema('fdic_data')
+            .rpc('get_market_share_of_top_deposits');
+
+        if (error) {
+            console.error("Error fetching market share (deposits) via RPC:", error);
+            throw error;
+        }
+
+        if (!data || !Array.isArray(data)) {
+            console.warn("No data or invalid data returned from get_market_share_of_top_deposits RPC call.");
+            return [];
+        }
+
+        return data.map((item: Partial<MarketShareItem>) => ({
+            group_name: String(item.group_name ?? 'Unknown'),
+            percentage_of_total: Number(item.percentage_of_total ?? 0),
+            bank_count: Number(item.bank_count ?? 0)
+        }));
+
+    } catch (err) {
+        console.error("Error in fetchMarketShareDepositsData:", { err });
+        return [];
+    }
+}
+
+// Fetch market share of top equity data using the RPC function
+async function fetchMarketShareEquityData(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    try {
+        const { data, error } = await supabase
+            .schema('fdic_data')
+            .rpc('get_market_share_of_top_eq');
+
+        if (error) {
+            console.error("Error fetching market share (equity) via RPC:", error);
+            throw error;
+        }
+
+        if (!data || !Array.isArray(data)) {
+            console.warn("No data or invalid data returned from get_market_share_of_top_eq RPC call.");
+            return [];
+        }
+
+        return data.map((item: Partial<MarketShareItem>) => ({
+            group_name: String(item.group_name ?? 'Unknown'),
+            percentage_of_total: Number(item.percentage_of_total ?? 0),
+            bank_count: Number(item.bank_count ?? 0)
+        }));
+
+    } catch (err) {
+        console.error("Error in fetchMarketShareEquityData:", { err });
+        return [];
+    }
+}
+
+// Fetch market share of top net income data using the RPC function
+async function fetchMarketShareNetIncomeData(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    try {
+        const { data, error } = await supabase
+            .schema('fdic_data')
+            .rpc('get_market_share_of_top_netinc');
+
+        if (error) {
+            console.error("Error fetching market share (net income) via RPC:", error);
+            throw error;
+        }
+
+        if (!data || !Array.isArray(data)) {
+            console.warn("No data or invalid data returned from get_market_share_of_top_netinc RPC call.");
+            return [];
+        }
+
+        return data.map((item: Partial<MarketShareItem>) => ({
+            group_name: String(item.group_name ?? 'Unknown'),
+            percentage_of_total: Number(item.percentage_of_total ?? 0),
+            bank_count: Number(item.bank_count ?? 0)
+        }));
+
+    } catch (err) {
+        console.error("Error in fetchMarketShareNetIncomeData:", { err });
+        return [];
+    }
+}
+
+// Exported function wraps the market share (assets) fetching logic with unstable_cache
+export async function getMarketShareAssets(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    const cacheKey = "marketShareAssets";
+
+    const cachedFetch = unstable_cache(
+        async () => {
+            console.log(`Cache miss for key: ${cacheKey}`);
+            return fetchMarketShareAssetsData(supabase);
+        },
+        [cacheKey],
+        {
+            revalidate: 3600,
+            tags: ["statistics", "institutions", "marketShare", "assets"],
+        }
+    );
+
+    try {
+        return await cachedFetch();
+    } catch (err) {
+        console.error("Error executing cached getMarketShareAssets:", { err });
+        return [];
+    }
+}
+
+// Exported function wraps the market share (deposits) fetching logic with unstable_cache
+export async function getMarketShareDeposits(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    const cacheKey = "marketShareDeposits";
+
+    const cachedFetch = unstable_cache(
+        async () => {
+            console.log(`Cache miss for key: ${cacheKey}`);
+            return fetchMarketShareDepositsData(supabase);
+        },
+        [cacheKey],
+        {
+            revalidate: 3600,
+            tags: ["statistics", "institutions", "marketShare", "deposits"],
+        }
+    );
+
+    try {
+        return await cachedFetch();
+    } catch (err) {
+        console.error("Error executing cached getMarketShareDeposits:", { err });
+        return [];
+    }
+}
+
+// Exported function wraps the market share (equity) fetching logic with unstable_cache
+export async function getMarketShareEquity(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    const cacheKey = "marketShareEquity";
+
+    const cachedFetch = unstable_cache(
+        async () => {
+            console.log(`Cache miss for key: ${cacheKey}`);
+            return fetchMarketShareEquityData(supabase);
+        },
+        [cacheKey],
+        {
+            revalidate: 3600,
+            tags: ["statistics", "institutions", "marketShare", "equity"],
+        }
+    );
+
+    try {
+        return await cachedFetch();
+    } catch (err) {
+        console.error("Error executing cached getMarketShareEquity:", { err });
+        return [];
+    }
+}
+
+// Exported function wraps the market share (net income) fetching logic with unstable_cache
+export async function getMarketShareNetIncome(
+    supabase: SupabaseClient<Database>
+): Promise<MarketShareItem[]> {
+    const cacheKey = "marketShareNetIncome";
+
+    const cachedFetch = unstable_cache(
+        async () => {
+            console.log(`Cache miss for key: ${cacheKey}`);
+            return fetchMarketShareNetIncomeData(supabase);
+        },
+        [cacheKey],
+        {
+            revalidate: 3600,
+            tags: ["statistics", "institutions", "marketShare", "netIncome"],
+        }
+    );
+
+    try {
+        return await cachedFetch();
+    } catch (err) {
+        console.error("Error executing cached getMarketShareNetIncome:", { err });
+        return [];
+    }
+}
+
