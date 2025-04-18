@@ -18,6 +18,12 @@ export interface BankAgeDistributionItem {
     count: number;
 }
 
+// Define the structure for bank establishment trend data items
+export interface BankEstablishmentTrendItem {
+    year: string;
+    count: number;
+}
+
 // Fetch the key statistics data using the RPC function
 async function fetchKeyStatisticsData(
   supabase: SupabaseClient<Database>
@@ -107,6 +113,39 @@ async function fetchBankAgeDistributionData(
     }
 }
 
+// Fetch the bank establishment trend data using the RPC function
+async function fetchBankEstablishmentTrendData(
+  supabase: SupabaseClient<Database>
+): Promise<BankEstablishmentTrendItem[]> {
+    try {
+        // Call the PostgreSQL function using rpc
+        const { data, error } = await supabase
+          .schema('fdic_data')
+          .rpc('get_bank_establishment_trend');
+
+        if (error) {
+            console.error("Error fetching bank establishment trend via RPC:", error);
+            throw error;
+        }
+
+        // Type guard for null/undefined data or empty array
+        if (!data || !Array.isArray(data)) {
+            console.warn("No data or invalid data returned from get_bank_establishment_trend RPC call.");
+            return []; // Return empty array if no data
+        }
+
+        // Ensure the returned values match the expected type
+        return data.map((item: BankEstablishmentTrendItem) => ({
+            year: String(item.year ?? 'Unknown'),
+            count: Number(item.count ?? 0)
+        }));
+
+    } catch (err) {
+        console.error("Error in fetchBankEstablishmentTrendData:", { err });
+        return []; // Return empty array on error
+    }
+}
+
 // Exported function wraps the fetching logic with unstable_cache
 export async function getKeyStatistics(
   supabase: SupabaseClient<Database>
@@ -162,6 +201,32 @@ export async function getBankAgeDistribution(
         return await cachedFetch();
     } catch (err) {
         console.error("Error executing cached getBankAgeDistribution:", { err });
+        return []; // Return empty array on error
+    }
+}
+
+// Exported function wraps the bank establishment trend fetching logic with unstable_cache
+export async function getBankEstablishmentTrend(
+    supabase: SupabaseClient<Database>
+): Promise<BankEstablishmentTrendItem[]> {
+    const cacheKey = "bankEstablishmentTrend";
+
+    const cachedFetch = unstable_cache(
+        async () => {
+            console.log(`Cache miss for key: ${cacheKey}`);
+            return fetchBankEstablishmentTrendData(supabase);
+        },
+        [cacheKey],
+        {
+            revalidate: 10, // Revalidate cache every hour
+            tags: ["statistics", "institutions", "establishmentTrend"],
+        }
+    );
+
+    try {
+        return await cachedFetch();
+    } catch (err) {
+        console.error("Error executing cached getBankEstablishmentTrend:", { err });
         return []; // Return empty array on error
     }
 }

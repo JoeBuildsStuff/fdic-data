@@ -508,6 +508,13 @@ export type Database = {
           count: number
         }[]
       }
+      get_bank_establishment_trend: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          year: string
+          count: number
+        }[]
+      }
       get_key_statistics: {
         Args: Record<PropertyKey, never>
         Returns: {
