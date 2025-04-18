@@ -1,4 +1,4 @@
-import { MarketShareItem } from './_lib/queries'; // Assuming the interface is exported from queries
+import { MarketShareItem } from '../_lib/queries'; // Assuming the interface is exported from queries
 import {
   Card,
   CardContent,

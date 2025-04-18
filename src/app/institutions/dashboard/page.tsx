@@ -15,10 +15,10 @@ import {
   getMarketShareEquity,
   getMarketShareNetIncome
 } from './_lib/queries';
-import { ColumnChartCard } from './column-chart-card';
-import { BarChartCard } from './bar-chart-card'; 
-import { MarketShareCard } from './market-share-card'; // Import the new component
-import { StatisticCard } from './statistic-card'; // Import the new StatisticCard component
+import { ColumnChartCard } from './_components/column-chart-card';
+import { BarChartCard } from './_components/bar-chart-card'; 
+import { MarketShareCard } from './_components/market-share-card'; // Import the new component
+import { StatisticCard } from './_components/statistic-card'; // Import the new StatisticCard component
 import {
   ChartConfig
 } from "@/components/ui/chart";
