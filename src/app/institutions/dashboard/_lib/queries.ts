@@ -244,7 +244,7 @@ export async function fetchBankClassData(
       // Revert to fetching only bkclass and counting client-side
       const { data, error } = await supabase
         .schema('fdic_data')
-        .from('fdic_data_institutions')
+        .from('institutions')
         .select('bkclass') // Select only bkclass
         .eq('active', '1');
   
@@ -277,7 +277,7 @@ export async function fetchCommunityBankData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('cb')
       .eq('active', '1');
 
@@ -371,7 +371,7 @@ export async function fetchRegulatorAgentData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('regagnt')
       .eq('active', '1');
 
@@ -429,7 +429,7 @@ export async function fetchSpecializationNameData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('specgrpn')
       .eq('active', '1');
 
@@ -487,7 +487,7 @@ export async function fetchFederalCharterData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('fedchrtr')
       .eq('active', '1');
 
@@ -545,7 +545,7 @@ export async function fetchStateCharterData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('stchrtr')
       .eq('active', '1');
 
@@ -603,7 +603,7 @@ export async function fetchCharteringAgencyData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('chrtagnt')
       .eq('active', '1');
 
@@ -661,7 +661,7 @@ export async function fetchInstitutionCreditCodeData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('instcrcd')
       .eq('active', '1');
 
@@ -719,7 +719,7 @@ export async function fetchSpecializationCodeData(
   try {
     const { data, error } = await supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select('specgrp')
       .eq('active', '1');
 

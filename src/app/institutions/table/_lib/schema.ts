@@ -4,7 +4,7 @@ import { z } from "zod";
 import type { Database } from "@/lib/database.types";
 
 // Define the Row type alias for brevity
-type InstitutionRow = Database['fdic_data']['Tables']['fdic_data_institutions']['Row'];
+type InstitutionRow = Database['fdic_data']['Tables']['institutions']['Row'];
 
 // Keep the Zod schema for runtime validation if needed.
 // Ensure this manually stays in sync with the actual DB schema / InstitutionRow type.

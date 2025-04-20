@@ -10,7 +10,7 @@ export type Json =
 export type Database = {
   fdic_data: {
     Tables: {
-      fdic_data_institutions: {
+      institutions: {
         Row: {
           active: string | null
           address: string | null

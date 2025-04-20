@@ -13,8 +13,8 @@ import type { GetInstitutionsSchema } from "./validations";
 function applySupabaseFilters(
   query: PostgrestFilterBuilder<
     Database['fdic_data'],
-    Database['fdic_data']['Tables']['fdic_data_institutions']['Row'],
-    Database['fdic_data']['Tables']['fdic_data_institutions']['Row'][],
+    Database['fdic_data']['Tables']['institutions']['Row'],
+    Database['fdic_data']['Tables']['institutions']['Row'][],
     unknown
   >,
   filters: GetInstitutionsSchema['filters'],
@@ -142,8 +142,8 @@ async function fetchInstitutionsData(
   // Define the expected query builder type explicitly near the top
   type QueryBuilderType = PostgrestFilterBuilder<
     Database['fdic_data'],
-    Database['fdic_data']['Tables']['fdic_data_institutions']['Row'],
-    Database['fdic_data']['Tables']['fdic_data_institutions']['Row'][],
+    Database['fdic_data']['Tables']['institutions']['Row'],
+    Database['fdic_data']['Tables']['institutions']['Row'][],
     unknown
   >;
 
@@ -156,7 +156,7 @@ async function fetchInstitutionsData(
     // Start query using the passed Supabase client and add explicit cast
     let query = supabase
       .schema('fdic_data')
-      .from('fdic_data_institutions')
+      .from('institutions')
       .select(selectColumns, { count: 'exact' }) as QueryBuilderType;
 
     if ( input.filters.length > 0) {
