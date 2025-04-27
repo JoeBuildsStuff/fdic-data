@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -10,6 +9,50 @@ export type Json =
 export type Database = {
   fdic_data: {
     Tables: {
+      fields: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          elastic_analyzer: Json | null
+          elastic_type: string | null
+          field_id: number
+          field_name: string
+          field_type: string | null
+          format: string | null
+          source_mapping: Json | null
+          source_overwrite: boolean | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          elastic_analyzer?: Json | null
+          elastic_type?: string | null
+          field_id?: number
+          field_type?: string | null
+          format?: string | null
+          source_mapping?: Json | null
+          source_overwrite?: boolean | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          elastic_analyzer?: Json | null
+          elastic_type?: string | null
+          field_id?: number
+          field_name?: string
+          field_type?: string | null
+          format?: string | null
+          source_mapping?: Json | null
+          source_overwrite?: boolean | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       institutions: {
         Row: {
           active: string | null
@@ -71,13 +114,13 @@ export type Database = {
           fdicregn: string | null
           fdicsupv: string | null
           fed: string | null
-          fed_rssd: string | null
+          fed_rssd: number | null
           fedchrtr: string | null
           fldoff: string | null
           form31: string | null
           hctmult: string | null
           iba: string | null
-          id: number | null
+          id: number
           inactive: string | null
           insagnt1: string | null
           insagnt2: string | null
@@ -232,13 +275,13 @@ export type Database = {
           fdicregn?: string | null
           fdicsupv?: string | null
           fed?: string | null
-          fed_rssd?: string | null
+          fed_rssd?: number | null
           fedchrtr?: string | null
           fldoff?: string | null
           form31?: string | null
           hctmult?: string | null
           iba?: string | null
-          id?: number | null
+          id?: number
           inactive?: string | null
           insagnt1?: string | null
           insagnt2?: string | null
@@ -393,13 +436,13 @@ export type Database = {
           fdicregn?: string | null
           fdicsupv?: string | null
           fed?: string | null
-          fed_rssd?: string | null
+          fed_rssd?: number | null
           fedchrtr?: string | null
           fldoff?: string | null
           form31?: string | null
           hctmult?: string | null
           iba?: string | null
-          id?: number | null
+          id?: number
           inactive?: string | null
           insagnt1?: string | null
           insagnt2?: string | null
@@ -496,6 +539,76 @@ export type Database = {
         }
         Relationships: []
       }
+      report_periods: {
+        Row: {
+          created_at: string | null
+          report_date: string
+          report_period_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          report_date: string
+          report_period_id?: number
+        }
+        Update: {
+          created_at?: string | null
+          report_date?: string
+          report_period_id?: number
+        }
+        Relationships: []
+      }
+      reported_values: {
+        Row: {
+          created_at: string | null
+          field_id: number
+          institution_id: number
+          report_period_id: number
+          reported_value_id: number
+          updated_at: string | null
+          value: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_id: number
+          institution_id: number
+          report_period_id: number
+          reported_value_id?: number
+          updated_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          field_id?: number
+          institution_id?: number
+          report_period_id?: number
+          reported_value_id?: number
+          updated_at?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_field"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "fields"
+            referencedColumns: ["field_id"]
+          },
+          {
+            foreignKeyName: "fk_institution"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_report_period"
+            columns: ["report_period_id"]
+            isOneToOne: false
+            referencedRelation: "report_periods"
+            referencedColumns: ["report_period_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -562,6 +675,20 @@ export type Database = {
           percentage_of_total: number
           bank_count: number
         }[]
+      }
+      upsert_field: {
+        Args: {
+          p_field_name: string
+          p_title: string
+          p_description: string
+          p_field_type: string
+          p_format: string
+          p_source_overwrite: boolean
+          p_source_mapping: Json
+          p_elastic_type: string
+          p_elastic_analyzer: Json
+        }
+        Returns: undefined
       }
     }
     Enums: {
