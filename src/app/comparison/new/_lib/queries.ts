@@ -52,7 +52,7 @@ export async function getFieldByName(supabase: SupabaseClient<Database, 'fdic_da
   const { data, error } = await supabase
     .schema('fdic_data')
     .from('fields')
-    .select('field_id, field_name, title, description')
+    .select('field_id, field_name, title, description, title_alt, description_alt')
     .eq('field_name', fieldName)
     .single(); // Use single() to expect only one row
 
