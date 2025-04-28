@@ -10,9 +10,9 @@ import {
 
 const FIELD_GROUPS = [
   "Assets, Liabilities, and Capital",
-  "Demographic Information",
   "Income and Expense",
-  "Performance and Condition Ratios: Only Available with Unit Type Percentages",
+  "Performance and Condition Ratios",
+  "Demographic Information",
 ];
 
 export default function FieldSelector() {

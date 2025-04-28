@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          description_alt: string | null
           elastic_analyzer: Json | null
           elastic_type: string | null
           field_id: number
@@ -22,24 +23,29 @@ export type Database = {
           source_mapping: Json | null
           source_overwrite: boolean | null
           title: string | null
+          title_alt: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           description?: string | null
+          description_alt?: string | null
           elastic_analyzer?: Json | null
           elastic_type?: string | null
           field_id?: number
+          field_name: string
           field_type?: string | null
           format?: string | null
           source_mapping?: Json | null
           source_overwrite?: boolean | null
           title?: string | null
+          title_alt?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
+          description_alt?: string | null
           elastic_analyzer?: Json | null
           elastic_type?: string | null
           field_id?: number
@@ -49,6 +55,7 @@ export type Database = {
           source_mapping?: Json | null
           source_overwrite?: boolean | null
           title?: string | null
+          title_alt?: string | null
           updated_at?: string | null
         }
         Relationships: []
