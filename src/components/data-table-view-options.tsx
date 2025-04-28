@@ -19,7 +19,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import * as React from "react";
-import type { AvailableColumn } from "@/app/institutions/table/_components/institutions-table-columns";
+
+// TODO: move to shared component - why are we importing this from the institutions table?
+import type { AvailableColumn } from "@/app/institutions/list/_components/institutions-table-columns";
 import type { Options } from "nuqs";
 
 interface DataTableViewOptionsProps {
