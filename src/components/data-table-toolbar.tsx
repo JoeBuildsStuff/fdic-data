@@ -4,7 +4,9 @@ import type { Column, Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import * as React from "react";
 import type { Options } from "nuqs";
-import type { AvailableColumn } from "@/app/institutions/table/_components/institutions-table-columns";
+
+// TODO: move to shared component - why are we importing this from the institutions table?
+import type { AvailableColumn } from "@/app/institutions/list/_components/institutions-table-columns";
 
 import { DataTableDateFilter } from "@/components/data-table-date-filter";
 import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter";
