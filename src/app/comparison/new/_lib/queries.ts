@@ -38,7 +38,7 @@ export async function getFields(supabase: SupabaseClient<Database, 'fdic_data'>)
   const { data, error } = await supabase
     .schema('fdic_data')
     .from('fields')
-    .select('*')
+    .select('field_id, field_name, title, description')
     .limit(10);
 
   if (error) {
@@ -52,7 +52,7 @@ export async function getFieldByName(supabase: SupabaseClient<Database, 'fdic_da
   const { data, error } = await supabase
     .schema('fdic_data')
     .from('fields')
-    .select('*')
+    .select('field_id, field_name, title, description')
     .eq('field_name', fieldName)
     .single(); // Use single() to expect only one row
 

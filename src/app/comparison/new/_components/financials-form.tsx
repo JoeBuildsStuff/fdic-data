@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 // import type { Institution, ReportPeriod } from './_lib/queries'; // Assuming these types are exported or defined appropriately
-import { getInstitutions, getReportPeriods } from './_lib/queries'; // Import functions instead
+import { getInstitutions, getReportPeriods } from '../_lib/queries'; // Import functions instead
 import {
   Select,
   SelectContent,
@@ -68,7 +68,7 @@ export default function FinancialsForm({
 
     const qs = newParams.toString();
     const query = qs ? `?${qs}` : '';
-    router.push(`/financials/table${query}`);
+    router.push(`/comparison/new${query}`);
   };
 
   return (
