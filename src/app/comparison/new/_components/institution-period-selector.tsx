@@ -41,6 +41,7 @@ export default function InstitutionPeriodSelector({
     // Get current parameter arrays
     const instParams = searchParams.getAll('institutionId');
     const periodParams = searchParams.getAll('reportPeriodId');
+    const currentFieldGroup = searchParams.get('fieldGroup'); // Get current field group
     const insts = [...instParams];
     const periods = [...periodParams];
 
@@ -63,6 +64,9 @@ export default function InstitutionPeriodSelector({
 
     // Build new search params
     const newParams = new URLSearchParams();
+    if (currentFieldGroup) { // Add fieldGroup if it exists
+      newParams.set('fieldGroup', currentFieldGroup);
+    }
     insts.forEach((val) => newParams.append('institutionId', val));
     periods.forEach((val) => newParams.append('reportPeriodId', val));
 

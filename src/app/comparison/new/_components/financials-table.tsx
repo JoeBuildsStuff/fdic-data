@@ -116,6 +116,7 @@ export default function FinancialsTable({
                   initialReportPeriodId={pair.reportPeriodId}
                   pairIndex={idx}
                 />
+
               </TableHead>
             ))}
             <TableHead className="py-2 justify-end">
