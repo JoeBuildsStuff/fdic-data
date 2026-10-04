@@ -10,6 +10,8 @@ export async function getReportPeriods(supabase: SupabaseClient<Database, 'fdic_
     .select('*')
     .limit(10);
 
+  console.log('report_periods', data);
+
   if (error) {
     console.error('Error fetching report_periods:', error);
     // Optionally, re-throw the error or return a specific error object
@@ -27,6 +29,8 @@ export async function getInstitutions(supabase: SupabaseClient<Database, 'fdic_d
     .order('dep', { ascending: false })
     .limit(10);
 
+  console.log('institutions', data);
+
   if (error) {
     console.error('Error fetching institutions:', error);
     return { data: null, error };
@@ -40,6 +44,8 @@ export async function getFields(supabase: SupabaseClient<Database, 'fdic_data'>)
     .from('fields')
     .select('field_id, field_name, title, description')
     .limit(10);
+
+  console.log('fields', data);
 
   if (error) {
     console.error('Error fetching fields:', error);
@@ -55,6 +61,8 @@ export async function getFieldByName(supabase: SupabaseClient<Database, 'fdic_da
     .select('field_id, field_name, title, description, title_alt, description_alt')
     .eq('field_name', fieldName)
     .single(); // Use single() to expect only one row
+
+  console.log('fieldByName', data);
 
   if (error) {
     console.error(`Error fetching field by name "${fieldName}":`, error);
@@ -77,6 +85,8 @@ export async function getReportedValue(
     .eq('field_id', fieldId)
     .eq('institution_id', institutionId)
     .maybeSingle();
+
+  console.log('reportedValue', data);
 
   if (error) {
     console.error(

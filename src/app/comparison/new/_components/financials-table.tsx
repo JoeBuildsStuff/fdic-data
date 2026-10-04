@@ -108,7 +108,7 @@ export default function FinancialsTable({
           <TableRow>
             <TableHead className="relative w-[200px] "><div className="absolute bottom-0 mb-2"><FieldSelector /></div></TableHead>
             {selectedData.map((pair, idx) => (
-              <TableHead key={idx} className="py-2 justify-end">
+              <TableHead key={idx} className="py-2">
                 <InstitutionPeriodSelector
                   institutions={institutions}
                   reportPeriods={reportPeriods}
@@ -119,7 +119,7 @@ export default function FinancialsTable({
 
               </TableHead>
             ))}
-            <TableHead className="py-2 justify-end">
+            <TableHead className="py-2">
               <InstitutionPeriodSelector
                 institutions={institutions}
                 reportPeriods={reportPeriods}
@@ -161,7 +161,7 @@ export default function FinancialsTable({
                           <span className="inline-block w-[18px]"></span>
                         )}
                         {/* Prioritize title_alt, then title, then field_name */}
-                        <span>{f.title_alt ?? f.title ?? f.field_name}:</span>
+                        <span className="text-wrap w-[20rem]">{f.title_alt ?? f.title ?? f.field_name}:</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-[300px]">
@@ -180,7 +180,7 @@ export default function FinancialsTable({
                   );
                   const val = fieldValues[originalIndex]?.[colIndex];
                   return (
-                    <TableCell key={colIndex} className="text-right">
+                    <TableCell key={colIndex} className="text-left">
                       {val !== null && val !== undefined
                         ? `${(val).toLocaleString()}`
                         : ''}
